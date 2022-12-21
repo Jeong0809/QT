@@ -45,24 +45,69 @@ void Widget::resizeGL(int w, int h)
 
 void Widget::paintGL()
 {
-    GLushort arPat[] = {0xaaaa, 0xaaaa, 0xaaaa, 0xaaaa,
-                       0x33ff, 0x33ff, 0x33ff, 0x57ff, 0x57ff};
-    GLint arFac[] = { 1, 2, 3, 4, 1, 2, 3, 1, 2};
+//    GLushort arPat[] = {0xaaaa, 0xaaaa, 0xaaaa, 0xaaaa,
+//                       0x33ff, 0x33ff, 0x33ff, 0x57ff, 0x57ff};
+//    GLint arFac[] = { 1, 2, 3, 4, 1, 2, 3, 1, 2};
 
     glClear(GL_COLOR_BUFFER_BIT);
     glColor3f(1.0, 1.0, 1.0);
 
-    glEnable(GL_LINE_STIPPLE);
-    GLfloat y;
-    GLint idx = 0;
-    for(y = 0.8; y > -0.8; y -= 0.2){
-        glLineStipple(arFac[idx], arPat[idx]);
-        glBegin(GL_LINES);
-        glVertex2f(-0.8, y);
-        glVertex2f(0.8, y);
-        glEnd();
-        idx++;
-    };
+    glBegin(GL_TRIANGLES);
+    glVertex2f(0.0, 0.5);
+    glVertex2f(-0.5, 0.0);
+    glVertex2f(0.0, 0.0);
+
+    glVertex2f(0.0, 0.0);
+    glVertex2f(0.5, 0.0);
+    glVertex2f(0.0, -0.5);
+
+
+
+//    glRectf(-0.8, 0.8, 0.8, -0.8);
+//    glFlush();
+
+//    glShadeModel(GL_FLAT);
+
+//    glBegin(GL_TRIANGLE_FAN);
+//    glColor3f(1.0, 0.0, 0.0);
+//    glVertex2f(0.0, 0.0);
+//    glVertex2f(0.0, 0.5);
+//    glVertex2f(-0.35, 0.35);
+
+//    glColor3f(0.0, 1.0, 0.0);
+//    glVertex2f(-0.5, 0.0);
+
+//    glColor3f(1.0, 0.0, 0.0);
+//    glVertex2f(-0.35, -0.35);
+
+//    glColor3f(0.0, 1.0, 0.0);
+//    glVertex2f(0.0, -0.5);
+
+//    GLfloat x = -0.8;
+//    GLfloat y = 0.4;
+//    for(int i = 0; i < 6; i++){
+//        if(i % 2 == 0){
+//            glColor3f(1.0, 0.0, 0.0);
+//        }
+//        else{
+//            glColor3f(0.0, 1.0, 0.0);
+//        }
+//        glVertex2f(x, y);
+//        x += 0.3;
+//        y *= -1;
+//    };
+
+//    glEnable(GL_LINE_STIPPLE);
+//    GLfloat y;
+//    GLint idx = 0;
+//    for(y = 0.8; y > -0.8; y -= 0.2){
+//        glLineStipple(arFac[idx], arPat[idx]);
+//        glBegin(GL_LINES);
+//        glVertex2f(-0.8, y);
+//        glVertex2f(0.8, y);
+//        glEnd();
+//        idx++;
+//    };
 
 //    double rad = 0.5;
 //    GLfloat w = 1, y;
