@@ -4,7 +4,6 @@
 #include <QWidget>
 #include <QtOpenGL>
 #include <QtOpenGLWidgets>
-#include <GL/glut.h>
 
 class Widget : public QOpenGLWidget,
         protected QOpenGLFunctions
@@ -21,6 +20,9 @@ private:
     void initializeGL();
     void paintGL();
     void resizeGL(int w, int h);
+
+protected:
+    void keyPressEvent(QKeyEvent* event);
 
 };
 #endif // WIDGET_H

@@ -5,7 +5,7 @@ greaterThan(QT_MAJOR_VERSION, 4): QT += widgets openglwidgets
 CONFIG += c++17
 
 windows {
-    LIBS += -lopengl32 -lfreeglut -L\Qt\6.4.1\msvc2019_64\lib\x64
+    LIBS += -lopengl32
 }
 
 # You can make your code fail to compile if it uses deprecated APIs.

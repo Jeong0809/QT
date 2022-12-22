@@ -6,7 +6,8 @@
 Widget::Widget(QWidget *parent)
     : QOpenGLWidget(parent)
 {
-    setWindowTitle("OpenGL GLUT3D");
+    xAngle = yAngle = zAngle = 0;
+    setWindowTitle("OpenGL VertexArrayIndex");
     resize(600, 600);
 }
 
@@ -30,41 +31,45 @@ void Widget::resizeGL(int w, int h)
 
 void Widget::paintGL()
 {
+    static GLfloat vert[] = {
+        0, 0, -0.8,
+        0.5, 0.5, 0,
+        -0.5, 0.5, 0,
+        -0.5, -0.5, 0,
+        0.5, -0.5, 0,
+    };
+
+    static GLubyte index[] = {
+        0, 1, 2,
+        0, 2, 3,
+        0, 3, 4,
+        0, 4, 1,
+    };
+
 
     glClear(GL_COLOR_BUFFER_BIT);
+    glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
+
+    glMatrixMode(GL_MODELVIEW);
 
     glPushMatrix();
-
     glRotatef(xAngle, 1.0f, 0.0f, 0.0f);
     glRotatef(yAngle, 0.0f, 1.0f, 0.0f);
     glRotatef(zAngle, 0.0f, 0.0f, 1.0f);
 
-    glutWireTeapot(0.3);
+    glRectf(-0.5, 0.5, 0.5, -0.5);
 
-    glPushMatrix();
-    glTranslatef(-0.6, 0.6, 0.0);
-    glutWireCube(0.4);
-    glPopMatrix();
+    glEnableClientState(GL_VERTEX_ARRAY);
+    glVertexPointer(3, GL_FLOAT, 0, vert);
 
-    glPushMatrix();
-    glTranslatef(-0.6, -0.6, 0.0);
-    glutWireSphere(0.3, 20, 20);
-    glPopMatrix();
-
-    glPushMatrix();
-    glTranslatef(0.6, 0.6, 0.0);
-    glutWireCone(0.3, 0.6, 20, 10);
-    glPopMatrix();
-
-    glPushMatrix();
-    glTranslatef(0.6, -0.6, 0.0);
-    glutWireTorus(0.1, 0.2, 20, 20);
-    glPopMatrix();
+    glDrawElements(GL_TRIANGLES, 12, GL_UNSIGNED_BYTE, index);
 
     glPopMatrix();
     glFlush();
 
 }
+
+
 
 
 

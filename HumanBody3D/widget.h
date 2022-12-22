@@ -22,5 +22,8 @@ private:
     void paintGL();
     void resizeGL(int w, int h);
 
+protected:
+    void keyPressEvent(QKeyEvent* event);
+
 };
 #endif // WIDGET_H

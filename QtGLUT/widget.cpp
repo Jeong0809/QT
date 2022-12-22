@@ -39,45 +39,39 @@ void Widget::paintGL()
     glRotatef(yAngle, 0.0f, 1.0f, 0.0f);
     glRotatef(zAngle, 0.0f, 0.0f, 1.0f);
 
-    glutWireTeapot(0.3);
+    GLUquadricObj* pQuad;
+    pQuad = gluNewQuadric();
+    gluQuadricDrawStyle(pQuad, GLU_LINE);
+
+    gluSphere(pQuad, 0.3, 20, 20);
+
 
     glPushMatrix();
     glTranslatef(-0.6, 0.6, 0.0);
-    glutWireCube(0.4);
+    gluCylinder(pQuad, 0.2, 0.2, 0.5, 20, 20);
     glPopMatrix();
 
     glPushMatrix();
     glTranslatef(-0.6, -0.6, 0.0);
-    glutWireSphere(0.3, 20, 20);
+    gluCylinder(pQuad, 0.2, 0.0, 0.5, 20, 20);
     glPopMatrix();
 
     glPushMatrix();
     glTranslatef(0.6, 0.6, 0.0);
-    glutWireCone(0.3, 0.6, 20, 10);
+    gluDisk(pQuad, 0.1, 0.3, 10, 10);
     glPopMatrix();
 
     glPushMatrix();
     glTranslatef(0.6, -0.6, 0.0);
-    glutWireTorus(0.1, 0.2, 20, 20);
+    gluDisk(pQuad, 0.0, 0.3, 10, 10);
     glPopMatrix();
+
+    gluDeleteQuadric(pQuad);
 
     glPopMatrix();
     glFlush();
 
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 
 

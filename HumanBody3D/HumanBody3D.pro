@@ -17,6 +17,7 @@ SOURCES += \
     widget.cpp
 
 HEADERS += \
+    glut.h \
     widget.h
 
 # Default rules for deployment.
