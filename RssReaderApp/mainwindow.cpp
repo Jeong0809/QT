@@ -1,6 +1,6 @@
 #include "mainwindow.h"
-#include "saveurls.h"
 
+#include "saveurls.h"
 #include <QtWidgets>
 #include <QSettings>
 #include <QDomDocument>
@@ -24,30 +24,25 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent) {
     connect(act, SIGNAL(triggered( )), SLOT(openRssFeed( )));
     toolbar->addAction(act);
 
-    tv = new QListView;
-    connect(tv, SIGNAL(doubleClicked(QModelIndex)), SLOT(listViewDoubleClicked(QModelIndex)));
+    tv= new QListView;
+    connect(tv, SIGNAL(doubleClicked(QModelIndex)),
+            SLOT(listViewDoubleClicked(QModelIndex)));
     model = new QStandardItemModel(0, 1, this);
     tv->setModel(model);
 
+    progress = new QProgressBar(this);
+    statusBar()->addPermanentWidget(progress);
+
+    wv = new QWebEngineView(this);
+    wv->load(QUrl("about:blank"));
+    connect(wv, SIGNAL(loadProgress(int)), progress, SLOT(setValue(int)));
+
     QSplitter *splitter = new QSplitter;
     splitter->addWidget(tv);
+    splitter->addWidget(wv);
     this->setCentralWidget(splitter);
 
-    manager = new QNetworkAccessManager(this);
-    connect(manager, SIGNAL(finished(QNetworkReply*)), SLOT(replyFinished(QNetworkReply*)));
 
-
-    QLibrary lib("SaveUrls");
-    if(!lib.isLoaded()) lib.load();
-    SaveUrls *saveUrl = (SaveUrls*)lib.resolve("SaveUrls");
-    QStringList urlList = saveUrl->load();
-    for(int i = 0; i < urlList.count(); i++){
-        combo->addItem(urlList.at(i));
-    }
-    if(lib.isLoaded()) lib.unload();
-
-    if(urlList.count() == 0)
-        combo->addItem("http://rss.joins.com/joins_news_list.xml");
 
 
     /* 기본 RSS 피드 사이트 등록 */
@@ -73,32 +68,16 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent) {
             SLOT(replyFinished(QNetworkReply*)));
 }
 
-void MainWindow::listViewDoubleClicked(const QModelIndex &index)
-{
-    qDebug("listViewDoubleClicked");
-}
-
 MainWindow::~MainWindow( )
 {
     QLibrary lib("SaveUrls");
     if(!lib.isLoaded()) lib.load();
-    SaveUrls* saveUrl = (SaveUrls*)lib.resolve("SaveUrls");
-    QStringList urlList;
-
-    for(int i = 0; i < combo->count(); i++)
+    SaveUrls *saveUrl = (SaveUrls*)lib.resolve("SaveUrls");
+    QStringList urlList = saveUrl->load();
+    for(int i=0; i<combo->count(); i++)
         urlList.append(combo->itemText(i));
     saveUrl->save(urlList);
     if(lib.isLoaded()) lib.unload();
-
-    /* RSS 피드 리스트 저장하기 */
-    QSettings settings;
-    settings.beginWriteArray("rssFeeds");
-    settings.remove("");
-    for (int i = 0; i < combo->count( ); i++) {
-        settings.setArrayIndex(i);
-        settings.setValue("url", combo->itemText(i));
-    }
-    settings.endArray( );
 }
 
 void MainWindow::openRssFeed( )
@@ -113,7 +92,8 @@ void MainWindow::openRssFeed( )
     }
 
     /*  RSS 사이트 접속 */
-    manager->get(QNetworkRequest(QUrl(combo->currentText( ))));
+    QNetworkReply *reply = manager->get(QNetworkRequest(QUrl(combo->currentText( ))));
+    connect(reply, SIGNAL(downloadProgress(qint64,qint64)), SLOT(downloadProgress(qint64,qint64)));
 }
 
 void MainWindow::replyFinished(QNetworkReply *netReply)
@@ -130,6 +110,7 @@ void MainWindow::replyFinished(QNetworkReply *netReply)
         QDomDocument doc;
         QString error;
         if(!doc.setContent(str, false, &error)){
+            wv->setHtml(QString("<h1>Error</h1>")+error);
             qDebug("Error");
         }else{
             QDomElement docElem = doc.documentElement();
@@ -170,5 +151,24 @@ void ListView::keyPressEvent(QKeyEvent *event)
         }
     } else {
         QListView::keyPressEvent(event);
+    }
+}
+
+void MainWindow::listViewDoubleClicked(const QModelIndex &index)
+{
+    QString strLink = index.data(Qt::UserRole).toString();
+    wv->load(QUrl(strLink));
+    qDebug("listViewDoubleClicked");
+}
+
+void MainWindow::downloadProgress(qint64 bytes, qint64 bytesTotal)
+{
+    if(bytesTotal == -1){
+        progress->setMinimum(0);
+        progress->setMaximum(0);
+    } else {
+        progress->setMaximum(100);
+        int percent = bytes*100 / bytesTotal;
+        progress->setValue(percent);
     }
 }

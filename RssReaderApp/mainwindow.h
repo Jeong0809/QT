@@ -6,7 +6,8 @@
 #include <QNetworkReply>
 #include <QListView>
 #include <QStandardItemModel>
-/* ~ 중간 표시 생략 ~ */
+#include <QProgressBar>
+#include <QWebEngineView>
 
 class MainWindow : public QMainWindow
 {
@@ -20,12 +21,15 @@ public slots:
     void openRssFeed( );
     void replyFinished(QNetworkReply*);
     void listViewDoubleClicked(const QModelIndex& index);
+    void downloadProgress(qint64 bytes, qint64 bytesTotal);
 
 private:
     QComboBox *combo;
     QNetworkAccessManager *manager;
     QListView *tv;
     QStandardItemModel* model;
+    QWebEngineView* wv;
+    QProgressBar* progress;
 };
 
 class ListView : public QListView {
