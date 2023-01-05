@@ -9,17 +9,14 @@ CONFIG += c++17
 #DEFINES += QT_DISABLE_DEPRECATED_BEFORE=0x060000    # disables all the APIs deprecated before Qt 6.0.0
 
 SOURCES += \
-    editimage.cpp \
     main.cpp \
-    mainwindow.cpp
+    widget.cpp
 
 HEADERS += \
-    editimage.h \
-    mainwindow.h
+    widget.h
 
 FORMS += \
-    editimage.ui \
-    mainwindow.ui
+    widget.ui
 
 # Default rules for deployment.
 qnx: target.path = /tmp/$${TARGET}/bin
