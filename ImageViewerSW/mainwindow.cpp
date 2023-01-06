@@ -1,6 +1,7 @@
 #include "mainwindow.h"
 #include "ui_mainwindow.h"
 #include "editimage.h"
+#include "album.h"
 
 #include <QFileDialog>
 #include <QColorSpace>
@@ -13,7 +14,7 @@ MainWindow::MainWindow(QWidget *parent)
 {
     ui->setupUi(this);
 
-    editimage = new EditImage(this);
+    editimage = new EditImage();
 
     connect(ui->pushButton, SIGNAL(clicked()), this, SLOT(ButtonClicked()));
     connect(ui->actionzoomIn, SIGNAL(clicked()), this, SLOT(ButtonClicked()));
@@ -24,6 +25,11 @@ MainWindow::MainWindow(QWidget *parent)
 
     connect(this, SIGNAL(popUpImage()),
                 editimage, SLOT(openImage()));
+
+    m_memoAlbum = new Album(ui->tabWidget);
+    ui->tabWidget->addTab(m_memoAlbum, tr("Album"));
+//    ui->graphicsView->setScene();
+//    editimage = new EditImage(ui->graphicsView);
 
 }
 
@@ -53,31 +59,21 @@ void MainWindow::ButtonClicked()
 
 void MainWindow::zoomIn()
 {
-//    img.scaled();
+
 }
 
 void MainWindow::wheelEvent(QWheelEvent* event)
 {
-//    setTransformationAnchor(AnchorUnderMouse);
-//    setDragMode(ScrollHandDrag);
-//    double scalefactor = 1.5;
-//    if(event->delta() > 0)
-//    {
-//        scale(scalefactor, scalefactor);
-//    }
 
-//    else {
-//        scale(1/scalefactor, 1/scalefactor);
-//    }
 }
 
 
 
-void MainWindow::on_graphicsView_customContextMenuRequested(const QPoint &pos)
-{
-    qDebug() << "1";
-    emit popUpImage();
-}
+//void MainWindow::on_graphicsView_customContextMenuRequested(const QPoint &pos)
+//{
+//    qDebug() << "1";
+//    emit popUpImage();
+//}
 
 void MainWindow::contextMenuEvent(QContextMenuEvent *event) {
     qDebug() << "2";
@@ -85,9 +81,11 @@ void MainWindow::contextMenuEvent(QContextMenuEvent *event) {
 }
 
 
-void MainWindow::on_graphicsView_rubberBandChanged(const QRect &viewportRect, const QPointF &fromScenePoint, const QPointF &toScenePoint)
-{
-    qDebug() << "3";
-    emit popUpImage();
-}
+//void MainWindow::on_graphicsView_rubberBandChanged(const QRect &viewportRect, const QPointF &fromScenePoint, const QPointF &toScenePoint)
+//{
+//    qDebug() << "3";
+//    emit popUpImage();
+//}
+
+
 

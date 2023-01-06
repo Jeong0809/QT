@@ -14,6 +14,8 @@ QT_BEGIN_NAMESPACE
 namespace Ui { class Widget; }
 QT_END_NAMESPACE
 
+class OhBrush;
+
 class Widget : public QWidget
 {
     Q_OBJECT
@@ -29,13 +31,17 @@ private:
     QColor paintColor;
     QGraphicsScene* scene;
     QPointF     previousPoint;
+    OhBrush* ohBrush;
 
     bool modified;
     QPointF prevPos;
     qreal  paintSize;
-    void mousePressEvent(QMouseEvent* event);
-    void mouseMoveEvent(QMouseEvent* event);
-    void mouseReleaseEvent(QMouseEvent* event);
+    QGraphicsSceneMouseEvent *event;
+    virtual void mousePressEvent(QMouseEvent *event);
+
+
+signals:
+    void sendBrush(OhBrush*, QColor);
 
 
 private slots:
@@ -45,5 +51,6 @@ private slots:
     void LeftRotate();
     void RightRotate();
     void Brush();
+    void Hand();
 };
 #endif // WIDGET_H

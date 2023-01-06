@@ -20,27 +20,6 @@
       <string>GroupBox</string>
      </property>
      <layout class="QGridLayout" name="gridLayout">
-      <item row="3" column="2">
-       <widget class="QToolButton" name="RightRotate">
-        <property name="text">
-         <string>우회전</string>
-        </property>
-       </widget>
-      </item>
-      <item row="3" column="3">
-       <widget class="QToolButton" name="Gray">
-        <property name="text">
-         <string>...</string>
-        </property>
-       </widget>
-      </item>
-      <item row="0" column="0">
-       <widget class="QToolButton" name="Brush">
-        <property name="text">
-         <string>브러쉬</string>
-        </property>
-       </widget>
-      </item>
       <item row="0" column="1">
        <widget class="QSpinBox" name="spinBox"/>
       </item>
@@ -51,10 +30,10 @@
         </property>
        </widget>
       </item>
-      <item row="1" column="0">
-       <widget class="QToolButton" name="ZoomIn">
+      <item row="0" column="2">
+       <widget class="QToolButton" name="Hand">
         <property name="text">
-         <string>줌인</string>
+         <string>손</string>
         </property>
        </widget>
       </item>
@@ -62,6 +41,27 @@
        <widget class="QToolButton" name="ZoomOut">
         <property name="text">
          <string>줌아웃</string>
+        </property>
+       </widget>
+      </item>
+      <item row="1" column="0">
+       <widget class="QToolButton" name="ZoomIn">
+        <property name="text">
+         <string>줌인</string>
+        </property>
+       </widget>
+      </item>
+      <item row="0" column="0">
+       <widget class="QToolButton" name="Brush">
+        <property name="text">
+         <string>브러쉬</string>
+        </property>
+       </widget>
+      </item>
+      <item row="3" column="1">
+       <widget class="QToolButton" name="RightRotate">
+        <property name="text">
+         <string>우회전</string>
         </property>
        </widget>
       </item>
