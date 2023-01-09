@@ -16,37 +16,10 @@
   <widget class="QWidget" name="centralwidget">
    <layout class="QHBoxLayout" name="horizontalLayout">
     <item>
-     <widget class="QTabWidget" name="tabWidget_2">
-      <property name="currentIndex">
-       <number>0</number>
+     <widget class="QMdiArea" name="mdiArea">
+      <property name="viewMode">
+       <enum>QMdiArea::TabbedView</enum>
       </property>
-      <widget class="QWidget" name="tab_3">
-       <attribute name="title">
-        <string>Tab 1</string>
-       </attribute>
-       <layout class="QHBoxLayout" name="horizontalLayout_2">
-        <item>
-         <widget class="QSplitter" name="splitter">
-          <property name="orientation">
-           <enum>Qt::Horizontal</enum>
-          </property>
-          <widget class="QTabWidget" name="tabWidget">
-           <property name="currentIndex">
-            <number>-1</number>
-           </property>
-          </widget>
-          <widget class="QGraphicsView" name="graphicsView"/>
-         </widget>
-        </item>
-        <item>
-         <widget class="QPushButton" name="pushButton">
-          <property name="text">
-           <string>이미지 불러오기</string>
-          </property>
-         </widget>
-        </item>
-       </layout>
-      </widget>
      </widget>
     </item>
    </layout>
@@ -79,28 +52,13 @@
    <attribute name="toolBarBreak">
     <bool>false</bool>
    </attribute>
-   <addaction name="actionBrush"/>
-   <addaction name="separator"/>
    <addaction name="actionText"/>
    <addaction name="separator"/>
-   <addaction name="actionRotation"/>
-   <addaction name="separator"/>
-   <addaction name="actionBrightness"/>
-   <addaction name="separator"/>
    <addaction name="actionCut"/>
-   <addaction name="separator"/>
-   <addaction name="actionzoomIn"/>
-   <addaction name="separator"/>
-   <addaction name="actionzoomOut"/>
   </widget>
   <action name="actionAbout">
    <property name="text">
     <string>도움말</string>
-   </property>
-  </action>
-  <action name="actionBrush">
-   <property name="text">
-    <string>브러쉬</string>
    </property>
   </action>
   <action name="actionText">
@@ -108,29 +66,9 @@
     <string>텍스트</string>
    </property>
   </action>
-  <action name="actionRotation">
-   <property name="text">
-    <string>회전</string>
-   </property>
-  </action>
-  <action name="actionBrightness">
-   <property name="text">
-    <string>밝기</string>
-   </property>
-  </action>
   <action name="actionCut">
    <property name="text">
     <string>자르기</string>
-   </property>
-  </action>
-  <action name="actionzoomIn">
-   <property name="text">
-    <string>줌인</string>
-   </property>
-  </action>
-  <action name="actionzoomOut">
-   <property name="text">
-    <string>줌아웃</string>
    </property>
   </action>
  </widget>

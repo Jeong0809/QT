@@ -4,6 +4,8 @@
 #include <QWidget>
 #include <QGraphicsView>
 
+class ImageView;
+
 namespace Ui {
 class EditImage;
 }
@@ -19,8 +21,7 @@ public:
 private:
     Ui::EditImage *ui;
 
-public slots:
-    void openImage();
+
 
 };
 
