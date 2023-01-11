@@ -5,6 +5,15 @@
 #include <QGraphicsScene>
 #include <QGroupBox>
 #include <QColorDialog>
+#include <QMouseEvent>
+#include <QMessageBox>
+
+#include <opencv2/imgcodecs.hpp>
+#include <opencv2/videoio.hpp>
+#include <opencv2/highgui.hpp>
+#include <opencv2/opencv.hpp>
+
+using namespace cv;
 
 #include "imagealbum.h"
 #include "ui_imagealbum.h"
@@ -13,38 +22,31 @@
 #define LIMIT_UBYTE(n) (n > UCHAR_MAX) ? UCHAR_MAX:(n<0) ? 0 : n
 
 ImageAlbum::ImageAlbum(QWidget *parent)
-    : QSplitter(parent), ui(new Ui::ImageAlbum)
+    : QWidget(parent), ui(new Ui::ImageAlbum)
 {
-    imageView = new ImageView(this);
-    imageView->setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOn);
-    imageView->setVerticalScrollBarPolicy(Qt::ScrollBarAlwaysOn);
-    imageView->setScene(imageView->graphicsScene);
-    imageView->graphicsScene->setSceneRect(0, 0,
-                                           imageView->graphicsScene->width(), imageView->graphicsScene->height());
-    imageView->grabGesture(Qt::PinchGesture);
+    ui->setupUi(this);
+    imageView = new ImageView();
 
-    listWidget = new QListWidget(this);
-    listWidget->setViewMode(QListWidget::IconMode);
-    listWidget->setIconSize(QSize(120, 80));
-    listWidget->setResizeMode(QListWidget::Adjust);
-    listWidget->setFlow(QListWidget::TopToBottom);
-    listWidget->setVerticalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
+    //    imageView->setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOn);
+    //    imageView->setVerticalScrollBarPolicy(Qt::ScrollBarAlwaysOn);
+    //    imageView->setScene(imageView->graphicsScene);
+    //    imageView->graphicsScene->setSceneRect(0, 0,
+    //    imageView->graphicsScene->width(), imageView->graphicsScene->height());
+    //    imageView->grabGesture(Qt::PinchGesture);
 
-    connect(listWidget, SIGNAL(itemDoubleClicked(QListWidgetItem*)), SLOT(selectItem(QListWidgetItem*)));
+    //    listWidget->setVerticalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
 
+    connect(ui->listWidget, SIGNAL(itemDoubleClicked(QListWidgetItem*)), SLOT(selectItem(QListWidgetItem*)));
+    ui->graphicsView->setScene(imageView->graphicsScene);
 
-    setOrientation(Qt::Horizontal);
-    addWidget(listWidget);
-    addWidget(imageView);
+    //    setOrientation(Qt::Horizontal);
+    //    addWidget(listWidget);
+    //    addWidget(imageView);
     //    setStretchFactor(0, 3);
 
-    QList<int> list;
-    list << 520 << 100;
-    setSizes(list);
-
-    reloadImages();
-
-    ui->setupUi(this);
+    //    QList<int> list;
+    //    list << 520 << 100;
+    //    setSizes(list);
 
     connect(ui->ZoomIn, SIGNAL(clicked()), this, SLOT(ZoomIn()));
     connect(ui->ZoomOut, SIGNAL(clicked()), this, SLOT(ZoomOut()));
@@ -53,8 +55,16 @@ ImageAlbum::ImageAlbum(QWidget *parent)
     connect(ui->Brush, SIGNAL(clicked()), this, SLOT(Brush()));
     connect(ui->OrigImage, SIGNAL(clicked()), this, SLOT(OrigImage()));
     connect(ui->horizontalSlider, SIGNAL(sliderMoved(int)), this, SLOT(Brightness(int)));
-    connect(ui->Gamma, SIGNAL(clicked()), this, SLOT(Gamma()));
+
     connect(ui->Sobel, SIGNAL(clicked()), this, SLOT(Sobel()));
+    connect(ui->VReverse, SIGNAL(clicked()), this, SLOT(VReverse()));
+    connect(ui->HReverse, SIGNAL(clicked()), this, SLOT(HReverse()));
+    connect(ui->Blur, SIGNAL(clicked()), this, SLOT(Blur()));
+    connect(ui->Edge, SIGNAL(clicked()), this, SLOT(Edge()));
+    connect(ui->Reverse, SIGNAL(clicked()), this, SLOT(Reverse()));
+    connect(ui->Contrast, SIGNAL(valueChanged(double)), this, SLOT(Contrast(double)));
+
+    reloadImages();
 }
 
 ImageAlbum::~ImageAlbum()
@@ -66,202 +76,301 @@ void ImageAlbum::reloadImages()
 {
     QDir dir(".");
     QStringList filters;
-    filters << "*.png" << "*.jpg" << "*.bmp";
+    filters << "*.png" << "*.jpg" << "*.bmp" << "*.gif" << "*.raw";
     QFileInfoList fileInfoList = dir.entryInfoList(filters, QDir::Files | QDir::NoDotAndDotDot);
     imageView->graphicsScene->clear();
 
-    listWidget->clear();
+    ui->listWidget->clear();
     for(int i = 0; i < fileInfoList.count(); i++) {
-        QListWidgetItem* item = new QListWidgetItem(QIcon(fileInfoList.at(i).fileName()), NULL, listWidget); //, QListWidgetItem::UserType);
+        QListWidgetItem* item = new QListWidgetItem(QIcon(fileInfoList.at(i).fileName()), NULL, ui->listWidget); //, QListWidgetItem::UserType);
         item->setStatusTip(fileInfoList.at(i).fileName());
-        listWidget->addItem(item);
+        ui->listWidget->addItem(item);
     };
+}
+
+
+
+void ImageAlbum::Edge()
+{
+
 }
 
 void ImageAlbum::Brush()
 {
-    imageView->setDragMode(QGraphicsView::NoDrag);
+    ui->graphicsView->setDragMode(QGraphicsView::NoDrag);
     paintColor = QColorDialog::getColor(paintColor, this);
+
 }
 
 void ImageAlbum::ZoomIn()
 {
-    imageView->scale(1.2, 1.2);
+    ui->graphicsView->scale(1.2, 1.2);
 }
 
 void ImageAlbum::ZoomOut()
 {
-    imageView->scale(0.8, 0.8);
+    ui->graphicsView->scale(0.8, 0.8);
 }
 
 void ImageAlbum::LeftRotate()
 {
-    imageView->rotate(-45);
+    ui->graphicsView->rotate(-45);
 }
 
 void ImageAlbum::RightRotate()
 {
-    imageView->rotate(45);
+    ui->graphicsView->rotate(45);
 }
 
 void ImageAlbum::OrigImage()
 {
-    imageView->resetTransform();
+    ui->graphicsView->resetTransform();
     imageView->graphicsScene->clear();
-    imageView->graphicsScene->addPixmap(QPixmap(origImage->statusTip()).scaled(640, 480,
-                                                                               Qt::KeepAspectRatio, Qt::SmoothTransformation));
+    imageView->graphicsScene->addPixmap(QPixmap(origImage->statusTip()).scaled(ui->graphicsView->width(), ui->graphicsView->height(),
+                                                                               Qt::IgnoreAspectRatio, Qt::SmoothTransformation));
 }
 
 void ImageAlbum::selectItem(QListWidgetItem* item)
 {
     origImage = item;
-    imageView->resetTransform();
+    selectImage = new QImage(ui->listWidget->currentItem()->statusTip());
+    ui->graphicsView->resetTransform();
     imageView->graphicsScene->clear();
-    imageView->graphicsScene->addPixmap(QPixmap(item->statusTip()).scaled(640, 480,
-                                                                          Qt::KeepAspectRatio, Qt::SmoothTransformation));
+    imageView->graphicsScene->addPixmap(QPixmap(item->statusTip()).scaled(ui->graphicsView->width(), ui->graphicsView->height(),
+                                                                          Qt::IgnoreAspectRatio, Qt::SmoothTransformation));
+
+    qDebug() << selectImage->width();
 }
 
 void ImageAlbum::setImage(QString path)
 {
-    imageView->resetTransform();
+    ui->graphicsView->resetTransform();
     imageView->graphicsScene->clear();
-    imageView->graphicsScene->addPixmap(QPixmap(path).scaled(640, 480, Qt::KeepAspectRatio, Qt::SmoothTransformation));
+    imageView->graphicsScene->addPixmap(QPixmap(path).scaled(ui->graphicsView->width(), ui->graphicsView->height(),
+                                                             Qt::IgnoreAspectRatio, Qt::SmoothTransformation));
 
     QFileInfo fileInfo(path);
-    for(int i = 0; i < listWidget->count(); i++) {
-        if(listWidget->item(i)->statusTip() == fileInfo.fileName()) {
-            listWidget->setCurrentRow(i);
+    for(int i = 0; i < ui->listWidget->count(); i++) {
+        if(ui->listWidget->item(i)->statusTip() == fileInfo.fileName()) {
+            ui->listWidget->setCurrentRow(i);
             break;
         }
     }
-
 }
 
 QString ImageAlbum::currentImage()
 {
-    return (listWidget->currentRow() >=0) ? listWidget->currentItem()->statusTip() : "";
+    return (ui->listWidget->currentRow() >=0) ? ui->listWidget->currentItem()->statusTip() : "";
 }
 
 void ImageAlbum::reset()
 {
-    imageView->resetTransform();
+    ui->graphicsView->resetTransform();
+}
+
+void ImageAlbum::VReverse()
+{
+    qDebug() << "Hi";
+    imageView->graphicsScene->clear();
+    QImage *image = new QImage(ui->listWidget->currentItem()->statusTip());
+    image->mirror(true, false);
+
+    QPixmap buf = QPixmap::fromImage(*image);
+    ui->graphicsView->setScene(imageView->graphicsScene);
+    imageView->graphicsScene->addPixmap(buf.scaled(ui->graphicsView->width(), ui->graphicsView->height(),
+                                                   Qt::IgnoreAspectRatio, Qt::SmoothTransformation));
+}
+
+void ImageAlbum::HReverse()
+{
+    imageView->graphicsScene->clear();
+    QImage *image = new QImage(ui->listWidget->currentItem()->statusTip());
+    image->mirror(false, true);
+
+    QPixmap buf = QPixmap::fromImage(*image);
+    ui->graphicsView->setScene(imageView->graphicsScene);
+    imageView->graphicsScene->addPixmap(buf.scaled(ui->graphicsView->width(), ui->graphicsView->height(),
+                                                   Qt::IgnoreAspectRatio, Qt::SmoothTransformation));
 }
 
 void ImageAlbum::Brightness(int value)
 {
     imageView->graphicsScene->clear();
-    QImage *image = new QImage(listWidget->currentItem()->statusTip());;
+    QImage *image = new QImage(ui->listWidget->currentItem()->statusTip());
 
-    for(int x = 0; x < image->width(); ++x)
-        for(int y = 0 ; y < image->height(); ++y) {
-            const QRgb rgb = image->pixel(x, y);
-            const double r = LIMIT_UBYTE(qRed(rgb) + value);
-            const double g = LIMIT_UBYTE(qGreen(rgb) + value);
-            const double b = LIMIT_UBYTE(qBlue(rgb) + value);
-            image->setPixelColor(x, y,
-                                 QColor(
-                                     r,
-                                     g,
-                                     b));
-        }
+    *image = image->convertToFormat(QImage::Format_RGB888);
+    cv::Mat in = cv::Mat(
+                image->height(),
+                image->width(),
+                CV_8UC3,
+                image->bits(),
+                image->bytesPerLine());
+    Mat out;
+    cvtColor(in, out, cv::COLOR_BGR2GRAY);
+    out = out + value;
 
-    //    QSize size = image->size();
-    //    image->scaled(size);
+    QImage image_brightness(
+                out.data,
+                out.cols,
+                out.rows,
+                out.step,
+                QImage::Format_Grayscale8);
 
-    QPixmap buf = QPixmap::fromImage(*image);
-    imageView->setScene(imageView->graphicsScene);
-    imageView->graphicsScene->addPixmap(buf);
+    QPixmap buf = QPixmap::fromImage(image_brightness);
+    ui->graphicsView->setScene(imageView->graphicsScene);
+    imageView->graphicsScene->addPixmap(buf.scaled(ui->graphicsView->width(), ui->graphicsView->height(),
+                                                   Qt::IgnoreAspectRatio, Qt::SmoothTransformation));
 }
 
-void ImageAlbum::Gamma()
+void ImageAlbum::Reverse()
 {
     imageView->graphicsScene->clear();
-    QImage *image = new QImage(listWidget->currentItem()->statusTip());
+    QImage *image = new QImage(ui->listWidget->currentItem()->statusTip());
 
-    for(int x = 0; x < image->width(); ++x)
-        for(int y = 0 ; y < image->height(); ++y) {
-            const QRgb rgb = image->pixel(x, y);
-            const double r = qRed(rgb) / 255.0;
-            const double g = qGreen(rgb) / 255.0;
-            const double b = qBlue(rgb) / 255.0;
-            image->setPixelColor(x, y,
-                                 QColor(
-                                     255 * std::pow(r, 1.3),
-                                     255 * std::pow(g, 1.3),
-                                     255 * std::pow(b, 1.3)));
-        }
+    *image = image->convertToFormat(QImage::Format_RGB888);
+    cv::Mat in = cv::Mat(
+                image->height(),
+                image->width(),
+                CV_8UC3,
+                image->bits(),
+                image->bytesPerLine());
+    Mat out;
+    cvtColor(in, out, cv::COLOR_BGR2GRAY);
+    out = 255 - out;
 
-    QPixmap buf = QPixmap::fromImage(*image);
-    imageView->setScene(imageView->graphicsScene);
-    imageView->graphicsScene->addPixmap(buf);
+    QImage image_brightness(
+                out.data,
+                out.cols,
+                out.rows,
+                out.step,
+                QImage::Format_Grayscale8);
+
+    QPixmap buf = QPixmap::fromImage(image_brightness);
+    ui->graphicsView->setScene(imageView->graphicsScene);
+    imageView->graphicsScene->addPixmap(buf.scaled(ui->graphicsView->width(), ui->graphicsView->height(),
+                                                   Qt::IgnoreAspectRatio, Qt::SmoothTransformation));
+}
+
+void ImageAlbum::Contrast(double value)
+{
+
+    imageView->graphicsScene->clear();
+    QImage *image = new QImage(ui->listWidget->currentItem()->statusTip());
+
+    *image = image->convertToFormat(QImage::Format_RGB888);
+    cv::Mat in = cv::Mat(
+                image->height(),
+                image->width(),
+                CV_8UC3,
+                image->bits(),
+                image->bytesPerLine());
+    Mat out;
+    cvtColor(in, out, cv::COLOR_BGR2GRAY);
+    Scalar avg = cv::mean(out) / 2.0;
+    out = out * value;
+
+    QImage image_contrast(
+                out.data,
+                out.cols,
+                out.rows,
+                out.step,
+                QImage::Format_Grayscale8);
+
+    QPixmap buf = QPixmap::fromImage(image_contrast);
+    ui->graphicsView->setScene(imageView->graphicsScene);
+    imageView->graphicsScene->addPixmap(buf.scaled(ui->graphicsView->width(), ui->graphicsView->height(),
+                                                   Qt::IgnoreAspectRatio, Qt::SmoothTransformation));
 }
 
 void ImageAlbum::Sobel()
 {
     imageView->graphicsScene->clear();
-    QImage *image = new QImage(listWidget->currentItem()->statusTip());
-    QImage *out = image;
+    QImage *image = new QImage(ui->listWidget->currentItem()->statusTip());
 
-    int kx[3][3] = {{-1, 0 , 1},
-                    {-2, 0, 2},
-                    {-1, 0, 1}};
-    int ky[3][3] = {{1, 2, 1},
-                    {0, 0, 0},
-                    {-1, -2, -1}};
+    int scale = 1;
+    int delta = 0;
+    int ddepth = CV_32FC1;
 
+    *image = image->convertToFormat(QImage::Format_RGB888);
+    Mat in = cv::Mat(
+                image->height(),
+                image->width(),
+                CV_8UC3,
+                image->bits(),
+                image->bytesPerLine());
 
-    for(int y=1; y < image->height()-1; y++){
-        for(int x = 1; x<image->width()-1; x++){
+    Mat out, grad_x, grad_y;
 
-            int a = (QColor(image->pixel(x-1,y-1)).red() + QColor(image->pixel(x-1,y-1)).blue()
-                     + QColor(image->pixel(x-1,y-1)).green())/3;
-            int b = (QColor(image->pixel(x,y-1)).red() + QColor(image->pixel(x,y-1)).blue()
-                     + QColor(image->pixel(x,y-1)).green())/3;
-            int c = (QColor(image->pixel(x+1,y-1)).red() + QColor(image->pixel(x+1,y-1)).green()
-                     + QColor(image->pixel(x+1,y-1)).blue())/3;
-            int d = (QColor(image->pixel(x-1,y)).blue() + QColor(image->pixel(x-1,y)).green()
-                     + QColor(image->pixel(x-1,y)).red())/3;
-            int e = (QColor(image->pixel(x,y)).green() + QColor(image->pixel(x,y)).red() + QColor(image->pixel(x,y)).blue())/3;
-            int f = (QColor(image->pixel(x+1,y)).blue() + QColor(image->pixel(x+1,y)).red()
-                     + QColor(image->pixel(x+1,y)).green())/3;
-            int g = (QColor(image->pixel(x-1,y+1)).green() + QColor(image->pixel(x-1,y+1)).red()
-                     + QColor(image->pixel(x-1,y+1)).blue())/3;
-            int h = (QColor(image->pixel(x,y+1)).blue() + QColor(image->pixel(x,y+1)).green()
-                     + QColor(image->pixel(x,y+1)).red())/3;
-            int i = (QColor(image->pixel(x+1,y+1)).red() + QColor(image->pixel(x+1,y+1)).green()
-                     + QColor(image->pixel(x+1,y+1)).blue())/3;
+    //color->gray로 컬러 변환
+    cvtColor(in, out, cv::COLOR_BGR2GRAY);
+    cv::Sobel(out, grad_x, ddepth, 1, 0, 3, scale, delta, cv::BORDER_CONSTANT);
+    cv::Sobel(out, grad_y, ddepth, 1, 0, 3, scale, delta, cv::BORDER_CONSTANT);
 
-            int matrix[3][3] = {{a,b,c},
-                                {d,e,f},
-                                {g,h,i}};
-            int sumx = 0;
-            int sumy = 0;
+    Mat float_mag, mag;
+    magnitude(grad_x, grad_y, float_mag);
+    float_mag.convertTo(mag, CV_8UC1);
 
-            for(int s=0; s<3; s++){
-                for(int t=0; t<3; t++){
-                    sumx = sumx + (matrix[s][t] * kx[s][t]);
-                    sumy = sumy + (matrix[s][t] * ky[s][t]); /* use ky, not kx */
-                }
-            }
+    QImage image_sobel(
+                mag.data,
+                mag.cols,
+                mag.rows,
+                mag.step,
+                QImage::Format_Grayscale8);
 
-            int newValue = sqrt(pow(sumx, 2) + pow(sumy, 2));
+    QPixmap buf = QPixmap::fromImage(image_sobel);
 
-            /* omitted, same as the original code */
+    ui->graphicsView->setScene(imageView->graphicsScene);
+    imageView->graphicsScene->addPixmap(buf.scaled(ui->graphicsView->width(), ui->graphicsView->height(),
+                                                   Qt::IgnoreAspectRatio, Qt::SmoothTransformation));
+}
 
-            QColor test = QColor(image->pixel(x,y));
+void ImageAlbum::Blur()
+{
+    imageView->graphicsScene->clear();
 
-            test.setRed(newValue);
-            test.setBlue(newValue);
-            test.setGreen(newValue);
-
-            out->setPixel(x, y, test.rgb()); /* modify out, not img */
-        }
+    // 이미지를 불러왔는지 확인합니다.
+    if (imageView->graphicsScene == nullptr) {
+        QMessageBox::information(this, "Information", "No image to edit.");
+        return;
     }
 
-    image = out; /* filter calculation is done, so update img */
+    QImage *image = new QImage(ui->listWidget->currentItem()->statusTip());
 
-    QPixmap buf = QPixmap::fromImage(*image);
-    imageView->setScene(imageView->graphicsScene);
-    imageView->graphicsScene->addPixmap(buf);
+    //OpenCV에서 이미지 작업을 하기 위해서 Matrix 타입으로 만들기 위해서 이미지 변환 작업을 해줍니다.
+    *image = image->convertToFormat(QImage::Format_RGB888);
+    cv::Mat mat = cv::Mat(
+                image->height(),
+                image->width(),
+                CV_8UC3,
+                image->bits(),
+                image->bytesPerLine());
+
+    // OpenCV에 있는 blur() 함수를 실행합니다. imgproc 모듈 안에 있는 기능입니다.
+    // 첫 번째 인수는 원본 이미지, 두 번째 인수는 blur 된 이미지, 세 번째 인수는 커널의 크기입니다. 여기에서 커널은
+    // OpenCV에게 주어진 픽셀의 값을 서로 다른 양의 인접 픽셀과 결합하여 값을 변경하는 방법을 알려줍니다.
+
+    cv::Mat tmp;
+    blur(mat, tmp, cv::Size(18, 18));
+    mat = tmp;
+
+    //다시 볼 수 있는 형태로 이미지를 복구시킵니다.
+    QImage image_blurred(
+                mat.data,
+                mat.cols,
+                mat.rows,
+                mat.step,
+                QImage::Format_RGB888);
+    //          QPixmap buf = QPixmap::fromImage(image_blurred);
+    //          imageView->graphicsScene->clear();
+    //          imageView->resetMatrix();
+    //          image = imageView->graphicsScene->addPixmap(buf);
+    //          imageView->graphicsScene->update();
+    //          imageView->setSceneRect(buf.rect());
+
+    QPixmap buf = QPixmap::fromImage(image_blurred);
+
+    ui->graphicsView->setScene(imageView->graphicsScene);
+    imageView->graphicsScene->addPixmap(buf.scaled(ui->graphicsView->width(), ui->graphicsView->height(),
+                                                   Qt::IgnoreAspectRatio, Qt::SmoothTransformation));
 }
 

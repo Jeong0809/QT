@@ -15,7 +15,7 @@ namespace Ui {
 class ImageAlbum;
 }
 
-class ImageAlbum : public QSplitter
+class ImageAlbum : public QWidget
 {
     Q_OBJECT
 
@@ -31,8 +31,8 @@ private:
     QGroupBox* groupBox;
     ImageView* imageView;
     QListWidgetItem* origImage;
-
     QColor paintColor;
+    QImage *selectImage;
 
 public slots:
     void reset();
@@ -45,9 +45,14 @@ public slots:
     void RightRotate();
     void Brush();
     void OrigImage();
-    void Gamma();
+    void Contrast(double value);
     void Brightness(int value);
     void Sobel();
+    void VReverse();
+    void HReverse();
+    void Blur();
+    void Edge();
+    void Reverse();
 };
 
 #endif // IMAGEALBUM_H

@@ -8,7 +8,7 @@
 #include <QGraphicsView>
 #include <QObject>
 #include <QListWidgetItem>
-
+#include "imagealbum.h"
 
 QT_BEGIN_NAMESPACE
 namespace Ui { class MainWindow; }
@@ -16,6 +16,7 @@ QT_END_NAMESPACE
 
 class EditImage;
 class ImageAlbum;
+class PatientInfo;
 
 class MainWindow : public QMainWindow
 {
@@ -28,9 +29,8 @@ public:
 private:
     Ui::MainWindow *ui;
     QImage *img;
-    EditImage* editimage;
-    ImageAlbum* m_memoAlbum;
-
+    ImageAlbum* m_imageAlbum;
+    PatientInfo* m_patientInfo;
 
 };
 #endif // MAINWINDOW_H
