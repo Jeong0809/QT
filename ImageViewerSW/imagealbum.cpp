@@ -25,28 +25,14 @@ ImageAlbum::ImageAlbum(QWidget *parent)
     : QWidget(parent), ui(new Ui::ImageAlbum)
 {
     ui->setupUi(this);
-    imageView = new ImageView();
 
-    //    imageView->setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOn);
-    //    imageView->setVerticalScrollBarPolicy(Qt::ScrollBarAlwaysOn);
-    //    imageView->setScene(imageView->graphicsScene);
-    //    imageView->graphicsScene->setSceneRect(0, 0,
-    //    imageView->graphicsScene->width(), imageView->graphicsScene->height());
-    //    imageView->grabGesture(Qt::PinchGesture);
+    imageView = new ImageView(this);
+    imageView->setGeometry(6, 6, 600, 600);
+    imageView->setSizeAdjustPolicy(QAbstractScrollArea::AdjustToContents);
+    imageView->setDragMode(QGraphicsView::NoDrag);
 
-    //    listWidget->setVerticalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
 
     connect(ui->listWidget, SIGNAL(itemDoubleClicked(QListWidgetItem*)), SLOT(selectItem(QListWidgetItem*)));
-    ui->graphicsView->setScene(imageView->graphicsScene);
-
-    //    setOrientation(Qt::Horizontal);
-    //    addWidget(listWidget);
-    //    addWidget(imageView);
-    //    setStretchFactor(0, 3);
-
-    //    QList<int> list;
-    //    list << 520 << 100;
-    //    setSizes(list);
 
     connect(ui->ZoomIn, SIGNAL(clicked()), this, SLOT(ZoomIn()));
     connect(ui->ZoomOut, SIGNAL(clicked()), this, SLOT(ZoomOut()));
@@ -55,14 +41,14 @@ ImageAlbum::ImageAlbum(QWidget *parent)
     connect(ui->Brush, SIGNAL(clicked()), this, SLOT(Brush()));
     connect(ui->OrigImage, SIGNAL(clicked()), this, SLOT(OrigImage()));
     connect(ui->horizontalSlider, SIGNAL(sliderMoved(int)), this, SLOT(Brightness(int)));
-
     connect(ui->Sobel, SIGNAL(clicked()), this, SLOT(Sobel()));
     connect(ui->VReverse, SIGNAL(clicked()), this, SLOT(VReverse()));
     connect(ui->HReverse, SIGNAL(clicked()), this, SLOT(HReverse()));
     connect(ui->Blur, SIGNAL(clicked()), this, SLOT(Blur()));
-    connect(ui->Edge, SIGNAL(clicked()), this, SLOT(Edge()));
     connect(ui->Reverse, SIGNAL(clicked()), this, SLOT(Reverse()));
     connect(ui->Contrast, SIGNAL(valueChanged(double)), this, SLOT(Contrast(double)));
+    connect(ui->HistEqual, SIGNAL(clicked()), this, SLOT(HistEqual()));
+    connect(ui->Sharpening, SIGNAL(clicked()), this, SLOT(Sharpening()));
 
     reloadImages();
 }
@@ -76,7 +62,7 @@ void ImageAlbum::reloadImages()
 {
     QDir dir(".");
     QStringList filters;
-    filters << "*.png" << "*.jpg" << "*.bmp" << "*.gif" << "*.raw";
+    filters << "*.png" << "*.jpg" << "*.bmp" << "*.gif";
     QFileInfoList fileInfoList = dir.entryInfoList(filters, QDir::Files | QDir::NoDotAndDotDot);
     imageView->graphicsScene->clear();
 
@@ -88,45 +74,37 @@ void ImageAlbum::reloadImages()
     };
 }
 
-
-
-void ImageAlbum::Edge()
-{
-
-}
-
 void ImageAlbum::Brush()
 {
-    ui->graphicsView->setDragMode(QGraphicsView::NoDrag);
+    imageView->setDragMode(QGraphicsView::NoDrag);
     paintColor = QColorDialog::getColor(paintColor, this);
-
 }
 
 void ImageAlbum::ZoomIn()
 {
-    ui->graphicsView->scale(1.2, 1.2);
+    imageView->scale(1.2, 1.2);
 }
 
 void ImageAlbum::ZoomOut()
 {
-    ui->graphicsView->scale(0.8, 0.8);
+    imageView->scale(0.8, 0.8);
 }
 
 void ImageAlbum::LeftRotate()
 {
-    ui->graphicsView->rotate(-45);
+    imageView->rotate(-45);
 }
 
 void ImageAlbum::RightRotate()
 {
-    ui->graphicsView->rotate(45);
+    imageView->rotate(45);
 }
 
 void ImageAlbum::OrigImage()
 {
-    ui->graphicsView->resetTransform();
+    imageView->resetTransform();
     imageView->graphicsScene->clear();
-    imageView->graphicsScene->addPixmap(QPixmap(origImage->statusTip()).scaled(ui->graphicsView->width(), ui->graphicsView->height(),
+    imageView->graphicsScene->addPixmap(QPixmap(origImage->statusTip()).scaled(imageView->width(), imageView->height(),
                                                                                Qt::IgnoreAspectRatio, Qt::SmoothTransformation));
 }
 
@@ -134,19 +112,19 @@ void ImageAlbum::selectItem(QListWidgetItem* item)
 {
     origImage = item;
     selectImage = new QImage(ui->listWidget->currentItem()->statusTip());
-    ui->graphicsView->resetTransform();
+    imageView->resetTransform();
     imageView->graphicsScene->clear();
-    imageView->graphicsScene->addPixmap(QPixmap(item->statusTip()).scaled(ui->graphicsView->width(), ui->graphicsView->height(),
-                                                                          Qt::IgnoreAspectRatio, Qt::SmoothTransformation));
+    imageView->graphicsScene->addPixmap(QPixmap(item->statusTip()).scaled(imageView->width(), imageView->height(),
+    Qt::IgnoreAspectRatio, Qt::SmoothTransformation));
 
     qDebug() << selectImage->width();
 }
 
 void ImageAlbum::setImage(QString path)
 {
-    ui->graphicsView->resetTransform();
+    imageView->resetTransform();
     imageView->graphicsScene->clear();
-    imageView->graphicsScene->addPixmap(QPixmap(path).scaled(ui->graphicsView->width(), ui->graphicsView->height(),
+    imageView->graphicsScene->addPixmap(QPixmap(path).scaled(imageView->width(), imageView->height(),
                                                              Qt::IgnoreAspectRatio, Qt::SmoothTransformation));
 
     QFileInfo fileInfo(path);
@@ -165,40 +143,39 @@ QString ImageAlbum::currentImage()
 
 void ImageAlbum::reset()
 {
-    ui->graphicsView->resetTransform();
+    imageView->resetTransform();
 }
 
 void ImageAlbum::VReverse()
 {
-    qDebug() << "Hi";
     imageView->graphicsScene->clear();
-    QImage *image = new QImage(ui->listWidget->currentItem()->statusTip());
-    image->mirror(true, false);
+    selectImage->mirror(true, false);
 
-    QPixmap buf = QPixmap::fromImage(*image);
-    ui->graphicsView->setScene(imageView->graphicsScene);
-    imageView->graphicsScene->addPixmap(buf.scaled(ui->graphicsView->width(), ui->graphicsView->height(),
+    QPixmap buf = QPixmap::fromImage(*selectImage);
+    imageView->setScene(imageView->graphicsScene);
+    imageView->graphicsScene->addPixmap(buf.scaled(imageView->width(), imageView->height(),
                                                    Qt::IgnoreAspectRatio, Qt::SmoothTransformation));
 }
 
 void ImageAlbum::HReverse()
 {
     imageView->graphicsScene->clear();
-    QImage *image = new QImage(ui->listWidget->currentItem()->statusTip());
-    image->mirror(false, true);
+    selectImage->mirror(false, true);
 
-    QPixmap buf = QPixmap::fromImage(*image);
-    ui->graphicsView->setScene(imageView->graphicsScene);
-    imageView->graphicsScene->addPixmap(buf.scaled(ui->graphicsView->width(), ui->graphicsView->height(),
+    QPixmap buf = QPixmap::fromImage(*selectImage);
+    imageView->setScene(imageView->graphicsScene);
+    imageView->graphicsScene->addPixmap(buf.scaled(imageView->width(), imageView->height(),
                                                    Qt::IgnoreAspectRatio, Qt::SmoothTransformation));
 }
 
 void ImageAlbum::Brightness(int value)
 {
     imageView->graphicsScene->clear();
-    QImage *image = new QImage(ui->listWidget->currentItem()->statusTip());
-
+    QImage *image = selectImage;
+//    QImage* image = nullptr;
     *image = image->convertToFormat(QImage::Format_RGB888);
+//    image = selectImage->convertToFormat(QImage::Format_RGB32);
+
     cv::Mat in = cv::Mat(
                 image->height(),
                 image->width(),
@@ -215,10 +192,40 @@ void ImageAlbum::Brightness(int value)
                 out.rows,
                 out.step,
                 QImage::Format_Grayscale8);
+//    selectImage = &image_brightness;
 
     QPixmap buf = QPixmap::fromImage(image_brightness);
-    ui->graphicsView->setScene(imageView->graphicsScene);
-    imageView->graphicsScene->addPixmap(buf.scaled(ui->graphicsView->width(), ui->graphicsView->height(),
+    imageView->setScene(imageView->graphicsScene);
+    imageView->graphicsScene->addPixmap(buf.scaled(imageView->width(), imageView->height(),
+                                                   Qt::IgnoreAspectRatio, Qt::SmoothTransformation));
+}
+
+void ImageAlbum::HistEqual()
+{
+    imageView->graphicsScene->clear();
+    QImage *image = new QImage(ui->listWidget->currentItem()->statusTip());
+
+    *image = image->convertToFormat(QImage::Format_RGB888);
+    cv::Mat in = cv::Mat(
+                image->height(),
+                image->width(),
+                CV_8UC3,
+                image->bits(),
+                image->bytesPerLine());
+    Mat out, Hist;
+    cvtColor(in, out, cv::COLOR_BGR2GRAY);
+    equalizeHist(out, Hist);
+
+    QImage image_Histogram(
+                Hist.data,
+                Hist.cols,
+                Hist.rows,
+                Hist.step,
+                QImage::Format_Grayscale8);
+
+    QPixmap buf = QPixmap::fromImage(image_Histogram);
+    imageView->setScene(imageView->graphicsScene);
+    imageView->graphicsScene->addPixmap(buf.scaled(imageView->width(), imageView->height(),
                                                    Qt::IgnoreAspectRatio, Qt::SmoothTransformation));
 }
 
@@ -246,14 +253,13 @@ void ImageAlbum::Reverse()
                 QImage::Format_Grayscale8);
 
     QPixmap buf = QPixmap::fromImage(image_brightness);
-    ui->graphicsView->setScene(imageView->graphicsScene);
-    imageView->graphicsScene->addPixmap(buf.scaled(ui->graphicsView->width(), ui->graphicsView->height(),
+    imageView->setScene(imageView->graphicsScene);
+    imageView->graphicsScene->addPixmap(buf.scaled(imageView->width(), imageView->height(),
                                                    Qt::IgnoreAspectRatio, Qt::SmoothTransformation));
 }
 
 void ImageAlbum::Contrast(double value)
 {
-
     imageView->graphicsScene->clear();
     QImage *image = new QImage(ui->listWidget->currentItem()->statusTip());
 
@@ -266,8 +272,7 @@ void ImageAlbum::Contrast(double value)
                 image->bytesPerLine());
     Mat out;
     cvtColor(in, out, cv::COLOR_BGR2GRAY);
-    Scalar avg = cv::mean(out) / 2.0;
-    out = out * value;
+    out = out * value ;
 
     QImage image_contrast(
                 out.data,
@@ -277,8 +282,8 @@ void ImageAlbum::Contrast(double value)
                 QImage::Format_Grayscale8);
 
     QPixmap buf = QPixmap::fromImage(image_contrast);
-    ui->graphicsView->setScene(imageView->graphicsScene);
-    imageView->graphicsScene->addPixmap(buf.scaled(ui->graphicsView->width(), ui->graphicsView->height(),
+    imageView->setScene(imageView->graphicsScene);
+    imageView->graphicsScene->addPixmap(buf.scaled(imageView->width(), imageView->height(),
                                                    Qt::IgnoreAspectRatio, Qt::SmoothTransformation));
 }
 
@@ -319,8 +324,8 @@ void ImageAlbum::Sobel()
 
     QPixmap buf = QPixmap::fromImage(image_sobel);
 
-    ui->graphicsView->setScene(imageView->graphicsScene);
-    imageView->graphicsScene->addPixmap(buf.scaled(ui->graphicsView->width(), ui->graphicsView->height(),
+    imageView->setScene(imageView->graphicsScene);
+    imageView->graphicsScene->addPixmap(buf.scaled(imageView->width(), imageView->height(),
                                                    Qt::IgnoreAspectRatio, Qt::SmoothTransformation));
 }
 
@@ -360,17 +365,74 @@ void ImageAlbum::Blur()
                 mat.rows,
                 mat.step,
                 QImage::Format_RGB888);
-    //          QPixmap buf = QPixmap::fromImage(image_blurred);
-    //          imageView->graphicsScene->clear();
-    //          imageView->resetMatrix();
-    //          image = imageView->graphicsScene->addPixmap(buf);
-    //          imageView->graphicsScene->update();
-    //          imageView->setSceneRect(buf.rect());
 
     QPixmap buf = QPixmap::fromImage(image_blurred);
 
-    ui->graphicsView->setScene(imageView->graphicsScene);
-    imageView->graphicsScene->addPixmap(buf.scaled(ui->graphicsView->width(), ui->graphicsView->height(),
+    imageView->setScene(imageView->graphicsScene);
+    imageView->graphicsScene->addPixmap(buf.scaled(imageView->width(), imageView->height(),
                                                    Qt::IgnoreAspectRatio, Qt::SmoothTransformation));
 }
+
+void ImageAlbum::filter(Mat img, Mat& dst, Mat mask)
+{
+    dst = Mat(img.size(), CV_32F, Scalar(0));
+
+    Point h_m = mask.size() / 2;
+
+    for(int i = h_m.y; i < img.rows - h_m.y; i++){
+        for(int j = h_m.x; j < img.cols - h_m.x; j++){
+
+            float sum = 0;
+            for(int u = 0; u < mask.rows; u++){
+                for(int v = 0; v < mask.cols; v++){
+                    int y = i + u - h_m.y;
+                    int x = j + v - h_m.x;
+                    sum += mask.at<float>(u, v) * img.at<uchar>(y, x);
+                }
+            }
+            dst.at<float>(i, j) = sum;
+        }
+    }
+}
+
+void ImageAlbum::Sharpening()
+{
+    imageView->graphicsScene->clear();
+    QImage *image = new QImage(ui->listWidget->currentItem()->statusTip());
+
+    //OpenCV에서 이미지 작업을 하기 위해서 Matrix 타입으로 만들기 위해서 이미지 변환 작업을 해줍니다.
+    *image = image->convertToFormat(QImage::Format_RGB888);
+    cv::Mat mat = cv::Mat(
+                image->height(),
+                image->width(),
+                CV_8UC3,
+                image->bits(),
+                image->bytesPerLine());
+
+    Mat blurred, out;
+    cvtColor(mat, out, cv::COLOR_BGR2GRAY);
+    GaussianBlur(mat, blurred, Size(), 8);
+
+    float alpha = 1.f;
+    Mat dst = (1 + alpha) * mat - alpha * blurred;
+
+    QImage image_sharpened(
+                dst.data,
+                dst.cols,
+                dst.rows,
+                dst.step,
+                QImage::Format_RGB888);
+
+    QPixmap buf = QPixmap::fromImage(image_sharpened);
+
+    imageView->setScene(imageView->graphicsScene);
+    imageView->graphicsScene->addPixmap(buf.scaled(imageView->width(), imageView->height(),
+                                                   Qt::IgnoreAspectRatio, Qt::SmoothTransformation));
+}
+
+
+
+
+
+
 

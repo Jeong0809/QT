@@ -2,6 +2,9 @@
 #define IMAGEVIEW_H
 
 #include <QGraphicsView>
+#include <QGraphicsItem>
+#include <QGraphicsSceneMouseEvent>
+#include <QWidget>
 
 class QPinchGesture;
 class QGestureEvent;
@@ -11,15 +14,15 @@ class ImageView : public QGraphicsView
     Q_OBJECT
 public:
     explicit ImageView(QWidget *parent = 0);
-    QGraphicsScene* graphicsScene;
-    QGraphicsView* imageView;
 
-protected:
+
+public:
     void mouseMoveEvent(QMouseEvent *event) Q_DECL_OVERRIDE;
-    void mousePressEvent(QMouseEvent *event) Q_DECL_OVERRIDE;
+    void mousePressEvent(QMouseEvent *event) override;
     void mouseReleaseEvent(QMouseEvent *event) Q_DECL_OVERRIDE;
     void wheelEvent(QWheelEvent *event) Q_DECL_OVERRIDE;
     bool event(QEvent *event) Q_DECL_OVERRIDE;
+    QGraphicsScene* graphicsScene;
 
 private:
     void pinchTriggered(QPinchGesture *gesture);

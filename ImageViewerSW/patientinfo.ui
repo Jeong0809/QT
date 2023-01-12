@@ -20,42 +20,6 @@
    <string>Form</string>
   </property>
   <layout class="QGridLayout" name="gridLayout">
-   <item row="0" column="0">
-    <widget class="QLabel" name="label">
-     <property name="font">
-      <font>
-       <bold>true</bold>
-      </font>
-     </property>
-     <property name="text">
-      <string>대기 환자 리스트</string>
-     </property>
-    </widget>
-   </item>
-   <item row="1" column="0">
-    <widget class="QTreeWidget" name="treeWidget">
-     <column>
-      <property name="text">
-       <string>ID</string>
-      </property>
-     </column>
-     <column>
-      <property name="text">
-       <string>이름</string>
-      </property>
-     </column>
-     <column>
-      <property name="text">
-       <string>생년월일</string>
-      </property>
-     </column>
-     <column>
-      <property name="text">
-       <string>성별</string>
-      </property>
-     </column>
-    </widget>
-   </item>
    <item row="2" column="0">
     <layout class="QHBoxLayout" name="horizontalLayout_2">
      <item>
@@ -94,25 +58,70 @@
     </widget>
    </item>
    <item row="4" column="0">
-    <widget class="QListWidget" name="listWidget">
-     <property name="flow">
-      <enum>QListView::TopToBottom</enum>
+    <widget class="QTableWidget" name="tableWidget">
+     <property name="layoutDirection">
+      <enum>Qt::LeftToRight</enum>
      </property>
-     <item>
+     <property name="editTriggers">
+      <set>QAbstractItemView::NoEditTriggers</set>
+     </property>
+     <property name="cornerButtonEnabled">
+      <bool>false</bool>
+     </property>
+     <row>
       <property name="text">
-       <string>이름</string>
+       <string>환자 번호</string>
       </property>
-     </item>
-     <item>
+     </row>
+     <row>
       <property name="text">
-       <string>나이</string>
+       <string>환자 이름</string>
       </property>
-     </item>
-     <item>
+     </row>
+     <row>
+      <property name="text">
+       <string>성별</string>
+      </property>
+     </row>
+     <row>
       <property name="text">
        <string>생년월일</string>
       </property>
-     </item>
+     </row>
+     <row>
+      <property name="text">
+       <string>메모</string>
+      </property>
+     </row>
+     <column>
+      <property name="text">
+       <string>정보</string>
+      </property>
+     </column>
+    </widget>
+   </item>
+   <item row="1" column="0">
+    <widget class="QTreeWidget" name="treeWidget">
+     <column>
+      <property name="text">
+       <string>ID</string>
+      </property>
+     </column>
+     <column>
+      <property name="text">
+       <string>이름</string>
+      </property>
+     </column>
+     <column>
+      <property name="text">
+       <string>생년월일</string>
+      </property>
+     </column>
+     <column>
+      <property name="text">
+       <string>성별</string>
+      </property>
+     </column>
     </widget>
    </item>
    <item row="5" column="0">
@@ -147,6 +156,18 @@
       </widget>
      </item>
     </layout>
+   </item>
+   <item row="0" column="0">
+    <widget class="QLabel" name="label">
+     <property name="font">
+      <font>
+       <bold>true</bold>
+      </font>
+     </property>
+     <property name="text">
+      <string>대기 환자 리스트</string>
+     </property>
+    </widget>
    </item>
   </layout>
  </widget>

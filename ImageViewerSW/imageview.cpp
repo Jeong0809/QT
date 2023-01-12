@@ -10,27 +10,35 @@
 ImageView::ImageView(QWidget *parent)
     : QGraphicsView(parent)
 {
-    graphicsScene = new QGraphicsScene;
+    graphicsScene = new QGraphicsScene(this);
+    setScene(graphicsScene);
 
     _pan = false;
     _currentStepScaleFactor = 1;
     resetTransform();
-    grabGesture(Qt::PinchGesture);
-    setAttribute(Qt::WA_AcceptTouchEvents);
+//    setAttribute(Qt::WA_AcceptTouchEvents);
+
+    setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
+    setVerticalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
+
+
 }
 
 void ImageView::mousePressEvent(QMouseEvent *event)
 {
+    qDebug("mousePressEvent");
     graphicsScene->addEllipse(event->pos().x(),
                       event->pos().y(),
                       30,
                       30,
                       QPen(Qt::NoPen),
                       QBrush(Qt::red));
-    qDebug("x : %d", event->pos().x());
-    qDebug("y : %d", event->pos().y());
+
 
     if (event->button() == Qt::LeftButton) {
+
+        qDebug("x : %d", event->pos().x());
+        qDebug("y : %d", event->pos().y());
         _pan = true;
         _panStartX = event->pos().x();
         _panStartY = event->pos().y();
@@ -43,6 +51,7 @@ void ImageView::mousePressEvent(QMouseEvent *event)
 
 void ImageView::mouseReleaseEvent(QMouseEvent *event)
 {
+    qDebug("mouseReleaseEvent");
     if (event->button() == Qt::LeftButton) {
         _pan = false;
         setCursor(Qt::ArrowCursor);
@@ -54,6 +63,7 @@ void ImageView::mouseReleaseEvent(QMouseEvent *event)
 
 void ImageView::mouseMoveEvent(QMouseEvent *event)
 {
+    qDebug("mouseMoveEvent");
     graphicsScene->addLine(event->pos().x(),
                 event->pos().x(),
                 event->pos().x()+2,

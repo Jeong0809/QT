@@ -2,14 +2,22 @@
 #define IMAGEALBUM_H
 
 #include <QWidget>
-#include <QSplitter>
+#include <QGraphicsView>
 #include <QGraphicsSceneMouseEvent>
+#include <QGraphicsScene>
+#include <opencv2/imgcodecs.hpp>
+#include <opencv2/videoio.hpp>
+#include <opencv2/highgui.hpp>
+#include <opencv2/opencv.hpp>
+
+using namespace cv;
 
 class ImageView;
 class QGraphicsScene;
 class QListWidget;
 class QListWidgetItem;
 class QGroupBox;
+
 
 namespace Ui {
 class ImageAlbum;
@@ -26,13 +34,21 @@ public:
 
 private:
     Ui::ImageAlbum *ui;
-    QGraphicsScene* graphicsScene;
     QListWidget* listWidget;
     QGroupBox* groupBox;
     ImageView* imageView;
     QListWidgetItem* origImage;
     QColor paintColor;
     QImage *selectImage;
+
+
+    bool _pan;
+    int _panStartX, _panStartY;
+    int _numScheduledScalings;
+    int _currentStepScaleFactor;
+    int _scaleFactor, _rotationAngle;
+
+    void filter(Mat img, Mat& dst, Mat mask);
 
 public slots:
     void reset();
@@ -51,8 +67,9 @@ public slots:
     void VReverse();
     void HReverse();
     void Blur();
-    void Edge();
     void Reverse();
+    void HistEqual();
+    void Sharpening();
 };
 
 #endif // IMAGEALBUM_H

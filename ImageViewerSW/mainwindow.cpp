@@ -27,8 +27,6 @@ MainWindow::MainWindow(QWidget *parent)
     QVBoxLayout *AlbumLayout = new QVBoxLayout();
     AlbumLayout->addWidget(m_imageAlbum);
     ui->frame_2->setLayout(AlbumLayout);
-
-
 }
 
 MainWindow::~MainWindow()
