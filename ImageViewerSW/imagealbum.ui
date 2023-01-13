@@ -95,13 +95,6 @@
          </property>
         </widget>
        </item>
-       <item row="4" column="0">
-        <widget class="QToolButton" name="Gamma">
-         <property name="text">
-          <string>감마</string>
-         </property>
-        </widget>
-       </item>
        <item row="4" column="1">
         <widget class="QToolButton" name="Sobel">
          <property name="text">
@@ -150,10 +143,10 @@
        <item row="7" column="1">
         <widget class="QSlider" name="horizontalSlider">
          <property name="minimum">
-          <number>-70</number>
+          <number>-20</number>
          </property>
          <property name="maximum">
-          <number>70</number>
+          <number>20</number>
          </property>
          <property name="orientation">
           <enum>Qt::Horizontal</enum>
@@ -237,6 +230,17 @@
     <layout class="QHBoxLayout" name="horizontalLayout_2">
      <item>
       <widget class="QPushButton" name="pushButton">
+       <property name="text">
+        <string>처방전
+작성</string>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="QPushButton" name="pushButton_2">
+       <property name="styleSheet">
+        <string notr="true">QPushButton {background-color: rgb(224, 255, 114)}</string>
+       </property>
        <property name="text">
         <string>진료
 종료</string>

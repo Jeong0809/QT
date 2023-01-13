@@ -9,9 +9,8 @@
 #include <QMessageBox>
 
 #include <opencv2/imgcodecs.hpp>
-#include <opencv2/videoio.hpp>
-#include <opencv2/highgui.hpp>
 #include <opencv2/opencv.hpp>
+#include <opencv2/imgproc.hpp>
 
 using namespace cv;
 
@@ -50,6 +49,7 @@ ImageAlbum::ImageAlbum(QWidget *parent)
     connect(ui->HistEqual, SIGNAL(clicked()), this, SLOT(HistEqual()));
     connect(ui->Sharpening, SIGNAL(clicked()), this, SLOT(Sharpening()));
 
+//    ui->horizontalSlider->setSliderPosition(70);
     reloadImages();
 }
 
@@ -122,28 +122,23 @@ void ImageAlbum::selectItem(QListWidgetItem* item)
 
 void ImageAlbum::setImage(QString path)
 {
-    imageView->resetTransform();
-    imageView->graphicsScene->clear();
-    imageView->graphicsScene->addPixmap(QPixmap(path).scaled(imageView->width(), imageView->height(),
-                                                             Qt::IgnoreAspectRatio, Qt::SmoothTransformation));
+//    imageView->resetTransform();
+//    imageView->graphicsScene->clear();
+//    imageView->graphicsScene->addPixmap(QPixmap(path).scaled(imageView->width(), imageView->height(),
+//                                                             Qt::IgnoreAspectRatio, Qt::SmoothTransformation));
 
-    QFileInfo fileInfo(path);
-    for(int i = 0; i < ui->listWidget->count(); i++) {
-        if(ui->listWidget->item(i)->statusTip() == fileInfo.fileName()) {
-            ui->listWidget->setCurrentRow(i);
-            break;
-        }
-    }
+//    QFileInfo fileInfo(path);
+//    for(int i = 0; i < ui->listWidget->count(); i++) {
+//        if(ui->listWidget->item(i)->statusTip() == fileInfo.fileName()) {
+//            ui->listWidget->setCurrentRow(i);
+//            break;
+//        }
+//    }
 }
 
 QString ImageAlbum::currentImage()
 {
     return (ui->listWidget->currentRow() >=0) ? ui->listWidget->currentItem()->statusTip() : "";
-}
-
-void ImageAlbum::reset()
-{
-    imageView->resetTransform();
 }
 
 void ImageAlbum::VReverse()
@@ -168,36 +163,56 @@ void ImageAlbum::HReverse()
                                                    Qt::IgnoreAspectRatio, Qt::SmoothTransformation));
 }
 
+
 void ImageAlbum::Brightness(int value)
 {
-    imageView->graphicsScene->clear();
-    QImage *image = selectImage;
-//    QImage* image = nullptr;
-    *image = image->convertToFormat(QImage::Format_RGB888);
-//    image = selectImage->convertToFormat(QImage::Format_RGB32);
 
+    imageView->graphicsScene->clear();
+    QImage* image = selectImage;
+    Mat out;
+
+//    image->convertTo(QImage::Format_Grayscale8);
+#if 0
+    uchar* data = image->bits();
+    for(int j = 0; j < image->size().height(); j++) {
+        for(int i = 0; i < image->size().width(); i++) {
+            *data = qMax(qMin(*data + value, 255), 0);
+            data++;
+        }
+    }
+    QPixmap buf = QPixmap::fromImage(*image);
+#else
+    *image = image->convertToFormat(QImage::Format_BGR888);
     cv::Mat in = cv::Mat(
                 image->height(),
                 image->width(),
-                CV_8UC3,
+                CV_8UC3,    //uchar
                 image->bits(),
                 image->bytesPerLine());
-    Mat out;
+
     cvtColor(in, out, cv::COLOR_BGR2GRAY);
-    out = out + value;
+
+    cv::Mat tmp = cv::Mat(
+                image->height(),
+                image->width(),
+                CV_8UC1    //uchar
+            );
+
+    tmp = out + value;
 
     QImage image_brightness(
-                out.data,
-                out.cols,
-                out.rows,
-                out.step,
+                tmp.data,
+                tmp.cols,
+                tmp.rows,
+                tmp.step,
                 QImage::Format_Grayscale8);
-//    selectImage = &image_brightness;
-
     QPixmap buf = QPixmap::fromImage(image_brightness);
+#endif
     imageView->setScene(imageView->graphicsScene);
     imageView->graphicsScene->addPixmap(buf.scaled(imageView->width(), imageView->height(),
                                                    Qt::IgnoreAspectRatio, Qt::SmoothTransformation));
+
+//    *selectImage = image->convertToFormat(QImage::Format_BGR888);
 }
 
 void ImageAlbum::HistEqual()
@@ -206,6 +221,7 @@ void ImageAlbum::HistEqual()
     QImage *image = new QImage(ui->listWidget->currentItem()->statusTip());
 
     *image = image->convertToFormat(QImage::Format_RGB888);
+
     cv::Mat in = cv::Mat(
                 image->height(),
                 image->width(),

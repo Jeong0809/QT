@@ -47,11 +47,11 @@ private:
     int _numScheduledScalings;
     int _currentStepScaleFactor;
     int _scaleFactor, _rotationAngle;
+    QPixmap buf;
 
     void filter(Mat img, Mat& dst, Mat mask);
 
 public slots:
-    void reset();
     void reloadImages();
     void selectItem(QListWidgetItem*);
     void setImage(QString);
