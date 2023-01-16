@@ -8,6 +8,7 @@
 
 class QPinchGesture;
 class QGestureEvent;
+class ImageAlbum;
 
 class ImageView : public QGraphicsView
 {
@@ -15,10 +16,9 @@ class ImageView : public QGraphicsView
 public:
     explicit ImageView(QWidget *parent = 0);
 
-
 public:
     void mouseMoveEvent(QMouseEvent *event) Q_DECL_OVERRIDE;
-    void mousePressEvent(QMouseEvent *event) override;
+    void mousePressEvent(QMouseEvent *event) Q_DECL_OVERRIDE;
     void mouseReleaseEvent(QMouseEvent *event) Q_DECL_OVERRIDE;
     void wheelEvent(QWheelEvent *event) Q_DECL_OVERRIDE;
     bool event(QEvent *event) Q_DECL_OVERRIDE;
@@ -33,10 +33,15 @@ private:
     int _numScheduledScalings;
     int _currentStepScaleFactor;
     int _scaleFactor, _rotationAngle;
+    QPointF startPos;
+    QGraphicsItem * lastRect;
+    QColor m_penColor;
+    int m_penThickness;
 
 private slots:
     void scalingTime(qreal);
     void animFinished();
+    void ReceiveInfo(const QColor&, int);
 };
 
 #endif // IMAGEVIEW_H

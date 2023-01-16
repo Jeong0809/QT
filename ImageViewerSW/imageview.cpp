@@ -15,34 +15,33 @@ ImageView::ImageView(QWidget *parent)
 
     _pan = false;
     _currentStepScaleFactor = 1;
-    resetTransform();
-//    setAttribute(Qt::WA_AcceptTouchEvents);
 
+    resetTransform();
     setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
     setVerticalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
 
+}
 
+void ImageView::ReceiveInfo(const QColor& paintColor, int value)
+{
+    m_penColor = paintColor;
+    m_penThickness = value;
+    qDebug() << "ImageView : " << m_penColor;
+    qDebug() << "ImageView : " << m_penThickness;
 }
 
 void ImageView::mousePressEvent(QMouseEvent *event)
 {
     qDebug("mousePressEvent");
-    graphicsScene->addEllipse(event->pos().x(),
-                      event->pos().y(),
-                      30,
-                      30,
-                      QPen(Qt::NoPen),
-                      QBrush(Qt::red));
-
 
     if (event->button() == Qt::LeftButton) {
-
-        qDebug("x : %d", event->pos().x());
-        qDebug("y : %d", event->pos().y());
-        _pan = true;
-        _panStartX = event->pos().x();
-        _panStartY = event->pos().y();
+        startPos = mapToScene(event->pos());
+        graphicsScene->addRect(startPos.x(), startPos.y(),
+                               50, 50,
+                               QPen(Qt::NoPen),
+                               QBrush(m_penColor));
         setCursor(Qt::ClosedHandCursor);
+        _pan = true;
         event->accept();
         return;
     }
@@ -52,40 +51,37 @@ void ImageView::mousePressEvent(QMouseEvent *event)
 void ImageView::mouseReleaseEvent(QMouseEvent *event)
 {
     qDebug("mouseReleaseEvent");
-    if (event->button() == Qt::LeftButton) {
-        _pan = false;
+
+    if(_pan){
         setCursor(Qt::ArrowCursor);
         event->accept();
-        return;
     }
+    _pan = false;
     event->ignore();
 }
 
 void ImageView::mouseMoveEvent(QMouseEvent *event)
 {
     qDebug("mouseMoveEvent");
-    graphicsScene->addLine(event->pos().x(),
-                event->pos().x(),
-                event->pos().x()+2,
-                event->pos().y()+2,
-                QPen(Qt::red, 10, Qt::SolidLine, Qt::RoundCap));
-        // Update on the previous coordinate data
-//        previousPoint = event->pos();
 
-    if (_pan)  {
-        horizontalScrollBar() ->setValue(horizontalScrollBar()->value() - (event->pos().x() - _panStartX));
-        verticalScrollBar()->setValue(verticalScrollBar()->value() - (event->pos().y() - _panStartY));
-        _panStartX = event->pos().x();
-        _panStartY = event->pos().y();
+    this->setDragMode(QGraphicsView::NoDrag);
+    QPointF newPos = mapToScene(event->pos());
+
+    if(_pan){
+        qDebug() << "Mouse pressed in view at position (Scene Coord) : " << newPos;
+        graphicsScene->addLine(startPos.x(), startPos.y(),
+                               newPos.x(), newPos.y(),
+                               QPen(m_penColor, m_penThickness, Qt::SolidLine, Qt::RoundCap));
         event->accept();
-        return;
     }
 
     event->ignore();
+    startPos = newPos;
 }
 
 void ImageView::wheelEvent(QWheelEvent *event)
 {
+    qDebug("wheelEvent");
     int numDegrees = event->angleDelta().y() / 8;
     int numSteps = numDegrees / 15; // see QWheelEvent documentation
     _numScheduledScalings += numSteps;

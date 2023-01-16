@@ -30,7 +30,7 @@ class ImageAlbum : public QWidget
 public:
     explicit ImageAlbum(QWidget *parent = nullptr);
     ~ImageAlbum();
-    QString currentImage();
+
 
 private:
     Ui::ImageAlbum *ui;
@@ -38,28 +38,20 @@ private:
     QGroupBox* groupBox;
     ImageView* imageView;
     QListWidgetItem* origImage;
+
+    QImage* selectImage;
+    QImage* origBrightness;
     QColor paintColor;
-    QImage *selectImage;
-
-
-    bool _pan;
-    int _panStartX, _panStartY;
-    int _numScheduledScalings;
-    int _currentStepScaleFactor;
-    int _scaleFactor, _rotationAngle;
-    QPixmap buf;
-
-    void filter(Mat img, Mat& dst, Mat mask);
+    int penThickness;
 
 public slots:
     void reloadImages();
     void selectItem(QListWidgetItem*);
-    void setImage(QString);
     void ZoomIn();
     void ZoomOut();
     void LeftRotate();
     void RightRotate();
-    void Brush();
+    void BrushColor();
     void OrigImage();
     void Contrast(double value);
     void Brightness(int value);
@@ -70,6 +62,11 @@ public slots:
     void Reverse();
     void HistEqual();
     void Sharpening();
+    void Thickness(int);
+
+
+signals:
+    void SendInfo(const QColor&, int);
 };
 
 #endif // IMAGEALBUM_H

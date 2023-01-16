@@ -17,12 +17,11 @@ MainWindow::MainWindow(QWidget *parent)
     ui->setupUi(this);
 
     m_patientInfo = new PatientInfo(this);
+    m_imageAlbum = new ImageAlbum(this);
 
     QVBoxLayout *PatientLayout = new QVBoxLayout();
     PatientLayout->addWidget(m_patientInfo);
-    ui->frame->setLayout(PatientLayout);
-
-    m_imageAlbum = new ImageAlbum(this);
+    ui->frame->setLayout(PatientLayout);  
 
     QVBoxLayout *AlbumLayout = new QVBoxLayout();
     AlbumLayout->addWidget(m_imageAlbum);

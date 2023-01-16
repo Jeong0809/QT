@@ -29,17 +29,17 @@ ImageAlbum::ImageAlbum(QWidget *parent)
     imageView->setGeometry(6, 6, 600, 600);
     imageView->setSizeAdjustPolicy(QAbstractScrollArea::AdjustToContents);
     imageView->setDragMode(QGraphicsView::NoDrag);
+    ui->gridLayout->addWidget(imageView);
 
 
     connect(ui->listWidget, SIGNAL(itemDoubleClicked(QListWidgetItem*)), SLOT(selectItem(QListWidgetItem*)));
-
     connect(ui->ZoomIn, SIGNAL(clicked()), this, SLOT(ZoomIn()));
     connect(ui->ZoomOut, SIGNAL(clicked()), this, SLOT(ZoomOut()));
     connect(ui->LeftRotate, SIGNAL(clicked()), this, SLOT(LeftRotate()));
     connect(ui->RightRotate, SIGNAL(clicked()), this, SLOT(RightRotate()));
-    connect(ui->Brush, SIGNAL(clicked()), this, SLOT(Brush()));
+    connect(ui->Brush, SIGNAL(clicked()), this, SLOT(BrushColor()));
     connect(ui->OrigImage, SIGNAL(clicked()), this, SLOT(OrigImage()));
-    connect(ui->horizontalSlider, SIGNAL(sliderMoved(int)), this, SLOT(Brightness(int)));
+    connect(ui->horizontalSlider, SIGNAL(valueChanged(int)), this, SLOT(Brightness(int)));
     connect(ui->Sobel, SIGNAL(clicked()), this, SLOT(Sobel()));
     connect(ui->VReverse, SIGNAL(clicked()), this, SLOT(VReverse()));
     connect(ui->HReverse, SIGNAL(clicked()), this, SLOT(HReverse()));
@@ -48,8 +48,15 @@ ImageAlbum::ImageAlbum(QWidget *parent)
     connect(ui->Contrast, SIGNAL(valueChanged(double)), this, SLOT(Contrast(double)));
     connect(ui->HistEqual, SIGNAL(clicked()), this, SLOT(HistEqual()));
     connect(ui->Sharpening, SIGNAL(clicked()), this, SLOT(Sharpening()));
+    connect(ui->Thickness, SIGNAL(valueChanged(int)), this, SLOT(Thickness(int)));
+    connect(ui->Lines, SIGNAL(clicked()), this, SLOT(Lines()));
+    connect(ui->Rectangle, SIGNAL(clicked()), this, SLOT(Rectangle()));
 
-//    ui->horizontalSlider->setSliderPosition(70);
+
+    /*GraphicsView에 펜 색상, 펜 두께, 선인지 도형인지를 구분하여 시그널 전송*/
+    connect(this, SIGNAL(SendInfo(QColor, int)), imageView, SLOT(ReceiveInfo(QColor, int)));
+
+
     reloadImages();
 }
 
@@ -74,10 +81,16 @@ void ImageAlbum::reloadImages()
     };
 }
 
-void ImageAlbum::Brush()
+void ImageAlbum::Thickness(int value)
 {
-    imageView->setDragMode(QGraphicsView::NoDrag);
+    penThickness = value;
+    emit SendInfo(paintColor, value);
+}
+
+void ImageAlbum::BrushColor()
+{
     paintColor = QColorDialog::getColor(paintColor, this);
+    emit SendInfo(paintColor, penThickness);
 }
 
 void ImageAlbum::ZoomIn()
@@ -104,6 +117,10 @@ void ImageAlbum::OrigImage()
 {
     imageView->resetTransform();
     imageView->graphicsScene->clear();
+    ui->horizontalSlider->setSliderPosition(0);
+    ui->Contrast->setValue(1.0);
+
+    *selectImage = QPixmap(origImage->statusTip()).toImage();
     imageView->graphicsScene->addPixmap(QPixmap(origImage->statusTip()).scaled(imageView->width(), imageView->height(),
                                                                                Qt::IgnoreAspectRatio, Qt::SmoothTransformation));
 }
@@ -114,31 +131,10 @@ void ImageAlbum::selectItem(QListWidgetItem* item)
     selectImage = new QImage(ui->listWidget->currentItem()->statusTip());
     imageView->resetTransform();
     imageView->graphicsScene->clear();
-    imageView->graphicsScene->addPixmap(QPixmap(item->statusTip()).scaled(imageView->width(), imageView->height(),
+    imageView->graphicsScene->addPixmap(QPixmap(item->statusTip()).scaled(selectImage->width(), selectImage->height(),
     Qt::IgnoreAspectRatio, Qt::SmoothTransformation));
 
     qDebug() << selectImage->width();
-}
-
-void ImageAlbum::setImage(QString path)
-{
-//    imageView->resetTransform();
-//    imageView->graphicsScene->clear();
-//    imageView->graphicsScene->addPixmap(QPixmap(path).scaled(imageView->width(), imageView->height(),
-//                                                             Qt::IgnoreAspectRatio, Qt::SmoothTransformation));
-
-//    QFileInfo fileInfo(path);
-//    for(int i = 0; i < ui->listWidget->count(); i++) {
-//        if(ui->listWidget->item(i)->statusTip() == fileInfo.fileName()) {
-//            ui->listWidget->setCurrentRow(i);
-//            break;
-//        }
-//    }
-}
-
-QString ImageAlbum::currentImage()
-{
-    return (ui->listWidget->currentRow() >=0) ? ui->listWidget->currentItem()->statusTip() : "";
 }
 
 void ImageAlbum::VReverse()
@@ -166,24 +162,13 @@ void ImageAlbum::HReverse()
 
 void ImageAlbum::Brightness(int value)
 {
-
     imageView->graphicsScene->clear();
     QImage* image = selectImage;
     Mat out;
 
-//    image->convertTo(QImage::Format_Grayscale8);
-#if 0
-    uchar* data = image->bits();
-    for(int j = 0; j < image->size().height(); j++) {
-        for(int i = 0; i < image->size().width(); i++) {
-            *data = qMax(qMin(*data + value, 255), 0);
-            data++;
-        }
-    }
-    QPixmap buf = QPixmap::fromImage(*image);
-#else
     *image = image->convertToFormat(QImage::Format_BGR888);
-    cv::Mat in = cv::Mat(
+
+    cv::Mat in(
                 image->height(),
                 image->width(),
                 CV_8UC3,    //uchar
@@ -191,36 +176,29 @@ void ImageAlbum::Brightness(int value)
                 image->bytesPerLine());
 
     cvtColor(in, out, cv::COLOR_BGR2GRAY);
-
-    cv::Mat tmp = cv::Mat(
-                image->height(),
-                image->width(),
-                CV_8UC1    //uchar
-            );
-
-    tmp = out + value;
+    out = out + value;
 
     QImage image_brightness(
-                tmp.data,
-                tmp.cols,
-                tmp.rows,
-                tmp.step,
+                out.data,
+                out.cols,
+                out.rows,
+                out.step,
                 QImage::Format_Grayscale8);
+
     QPixmap buf = QPixmap::fromImage(image_brightness);
-#endif
     imageView->setScene(imageView->graphicsScene);
     imageView->graphicsScene->addPixmap(buf.scaled(imageView->width(), imageView->height(),
                                                    Qt::IgnoreAspectRatio, Qt::SmoothTransformation));
 
-//    *selectImage = image->convertToFormat(QImage::Format_BGR888);
+    *selectImage = image_brightness.convertToFormat(QImage::Format_BGR888);
 }
 
 void ImageAlbum::HistEqual()
 {
     imageView->graphicsScene->clear();
-    QImage *image = new QImage(ui->listWidget->currentItem()->statusTip());
+    QImage* image = selectImage;
 
-    *image = image->convertToFormat(QImage::Format_RGB888);
+    *image = image->convertToFormat(QImage::Format_BGR888);
 
     cv::Mat in = cv::Mat(
                 image->height(),
@@ -243,14 +221,15 @@ void ImageAlbum::HistEqual()
     imageView->setScene(imageView->graphicsScene);
     imageView->graphicsScene->addPixmap(buf.scaled(imageView->width(), imageView->height(),
                                                    Qt::IgnoreAspectRatio, Qt::SmoothTransformation));
+    *selectImage = image_Histogram.convertToFormat(QImage::Format_BGR888);
 }
 
 void ImageAlbum::Reverse()
 {
     imageView->graphicsScene->clear();
-    QImage *image = new QImage(ui->listWidget->currentItem()->statusTip());
+    QImage* image = selectImage;
 
-    *image = image->convertToFormat(QImage::Format_RGB888);
+    *image = image->convertToFormat(QImage::Format_BGR888);
     cv::Mat in = cv::Mat(
                 image->height(),
                 image->width(),
@@ -261,25 +240,26 @@ void ImageAlbum::Reverse()
     cvtColor(in, out, cv::COLOR_BGR2GRAY);
     out = 255 - out;
 
-    QImage image_brightness(
+    QImage image_Reverse(
                 out.data,
                 out.cols,
                 out.rows,
                 out.step,
                 QImage::Format_Grayscale8);
 
-    QPixmap buf = QPixmap::fromImage(image_brightness);
+    QPixmap buf = QPixmap::fromImage(image_Reverse);
     imageView->setScene(imageView->graphicsScene);
     imageView->graphicsScene->addPixmap(buf.scaled(imageView->width(), imageView->height(),
                                                    Qt::IgnoreAspectRatio, Qt::SmoothTransformation));
+    *selectImage = image_Reverse.convertToFormat(QImage::Format_BGR888);
 }
 
 void ImageAlbum::Contrast(double value)
 {
     imageView->graphicsScene->clear();
-    QImage *image = new QImage(ui->listWidget->currentItem()->statusTip());
+    QImage* image = selectImage;
 
-    *image = image->convertToFormat(QImage::Format_RGB888);
+    *image = image->convertToFormat(QImage::Format_BGR888);
     cv::Mat in = cv::Mat(
                 image->height(),
                 image->width(),
@@ -290,17 +270,18 @@ void ImageAlbum::Contrast(double value)
     cvtColor(in, out, cv::COLOR_BGR2GRAY);
     out = out * value ;
 
-    QImage image_contrast(
+    QImage image_Contrast(
                 out.data,
                 out.cols,
                 out.rows,
                 out.step,
                 QImage::Format_Grayscale8);
 
-    QPixmap buf = QPixmap::fromImage(image_contrast);
+    QPixmap buf = QPixmap::fromImage(image_Contrast);
     imageView->setScene(imageView->graphicsScene);
     imageView->graphicsScene->addPixmap(buf.scaled(imageView->width(), imageView->height(),
                                                    Qt::IgnoreAspectRatio, Qt::SmoothTransformation));
+    *selectImage = image_Contrast.convertToFormat(QImage::Format_BGR888);
 }
 
 void ImageAlbum::Sobel()
@@ -348,17 +329,10 @@ void ImageAlbum::Sobel()
 void ImageAlbum::Blur()
 {
     imageView->graphicsScene->clear();
-
-    // 이미지를 불러왔는지 확인합니다.
-    if (imageView->graphicsScene == nullptr) {
-        QMessageBox::information(this, "Information", "No image to edit.");
-        return;
-    }
-
-    QImage *image = new QImage(ui->listWidget->currentItem()->statusTip());
+    QImage* image = selectImage;
 
     //OpenCV에서 이미지 작업을 하기 위해서 Matrix 타입으로 만들기 위해서 이미지 변환 작업을 해줍니다.
-    *image = image->convertToFormat(QImage::Format_RGB888);
+    *image = image->convertToFormat(QImage::Format_BGR888);
     cv::Mat mat = cv::Mat(
                 image->height(),
                 image->width(),
@@ -375,49 +349,28 @@ void ImageAlbum::Blur()
     mat = tmp;
 
     //다시 볼 수 있는 형태로 이미지를 복구시킵니다.
-    QImage image_blurred(
+    QImage image_Blur(
                 mat.data,
                 mat.cols,
                 mat.rows,
                 mat.step,
                 QImage::Format_RGB888);
 
-    QPixmap buf = QPixmap::fromImage(image_blurred);
+    QPixmap buf = QPixmap::fromImage(image_Blur);
 
     imageView->setScene(imageView->graphicsScene);
     imageView->graphicsScene->addPixmap(buf.scaled(imageView->width(), imageView->height(),
                                                    Qt::IgnoreAspectRatio, Qt::SmoothTransformation));
-}
-
-void ImageAlbum::filter(Mat img, Mat& dst, Mat mask)
-{
-    dst = Mat(img.size(), CV_32F, Scalar(0));
-
-    Point h_m = mask.size() / 2;
-
-    for(int i = h_m.y; i < img.rows - h_m.y; i++){
-        for(int j = h_m.x; j < img.cols - h_m.x; j++){
-
-            float sum = 0;
-            for(int u = 0; u < mask.rows; u++){
-                for(int v = 0; v < mask.cols; v++){
-                    int y = i + u - h_m.y;
-                    int x = j + v - h_m.x;
-                    sum += mask.at<float>(u, v) * img.at<uchar>(y, x);
-                }
-            }
-            dst.at<float>(i, j) = sum;
-        }
-    }
+    *selectImage = image_Blur.convertToFormat(QImage::Format_BGR888);
 }
 
 void ImageAlbum::Sharpening()
 {
     imageView->graphicsScene->clear();
-    QImage *image = new QImage(ui->listWidget->currentItem()->statusTip());
+    QImage* image = selectImage;
 
     //OpenCV에서 이미지 작업을 하기 위해서 Matrix 타입으로 만들기 위해서 이미지 변환 작업을 해줍니다.
-    *image = image->convertToFormat(QImage::Format_RGB888);
+    *image = image->convertToFormat(QImage::Format_BGR888);
     cv::Mat mat = cv::Mat(
                 image->height(),
                 image->width(),
@@ -427,23 +380,24 @@ void ImageAlbum::Sharpening()
 
     Mat blurred, out;
     cvtColor(mat, out, cv::COLOR_BGR2GRAY);
-    GaussianBlur(mat, blurred, Size(), 8);
+    GaussianBlur(out, blurred, Size(), 8);
 
     float alpha = 1.f;
-    Mat dst = (1 + alpha) * mat - alpha * blurred;
+    Mat dst = (1 + alpha) * out - alpha * blurred;
 
-    QImage image_sharpened(
+    QImage image_Sharpen(
                 dst.data,
                 dst.cols,
                 dst.rows,
                 dst.step,
-                QImage::Format_RGB888);
+                QImage::Format_Grayscale8);
 
-    QPixmap buf = QPixmap::fromImage(image_sharpened);
+    QPixmap buf = QPixmap::fromImage(image_Sharpen);
 
     imageView->setScene(imageView->graphicsScene);
     imageView->graphicsScene->addPixmap(buf.scaled(imageView->width(), imageView->height(),
                                                    Qt::IgnoreAspectRatio, Qt::SmoothTransformation));
+    *selectImage = image_Sharpen.convertToFormat(QImage::Format_BGR888);
 }
 
 
