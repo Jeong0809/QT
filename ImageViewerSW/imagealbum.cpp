@@ -7,7 +7,6 @@
 #include <QColorDialog>
 #include <QMouseEvent>
 #include <QMessageBox>
-
 #include <opencv2/imgcodecs.hpp>
 #include <opencv2/opencv.hpp>
 #include <opencv2/imgproc.hpp>
@@ -31,7 +30,6 @@ ImageAlbum::ImageAlbum(QWidget *parent)
     imageView->setDragMode(QGraphicsView::NoDrag);
     ui->gridLayout->addWidget(imageView);
 
-
     connect(ui->listWidget, SIGNAL(itemDoubleClicked(QListWidgetItem*)), SLOT(selectItem(QListWidgetItem*)));
     connect(ui->ZoomIn, SIGNAL(clicked()), this, SLOT(ZoomIn()));
     connect(ui->ZoomOut, SIGNAL(clicked()), this, SLOT(ZoomOut()));
@@ -50,11 +48,13 @@ ImageAlbum::ImageAlbum(QWidget *parent)
     connect(ui->Sharpening, SIGNAL(clicked()), this, SLOT(Sharpening()));
     connect(ui->Thickness, SIGNAL(valueChanged(int)), this, SLOT(Thickness(int)));
     connect(ui->Lines, SIGNAL(clicked()), this, SLOT(Lines()));
-    connect(ui->Rectangle, SIGNAL(clicked()), this, SLOT(Rectangle()));
+    connect(ui->Freehand, SIGNAL(clicked()), this, SLOT(Freehand()));
 
 
     /*GraphicsView에 펜 색상, 펜 두께, 선인지 도형인지를 구분하여 시그널 전송*/
-    connect(this, SIGNAL(SendInfo(QColor, int)), imageView, SLOT(ReceiveInfo(QColor, int)));
+    connect(this, SIGNAL(SendThickness(int)), imageView, SLOT(ReceiveThickness(int)));
+    connect(this, SIGNAL(SendBrushColor(QColor)), imageView, SLOT(ReceiveBrushColor(QColor)));
+    connect(this, SIGNAL(SendType(int)), imageView, SLOT(ReceiveType(int)));
 
 
     reloadImages();
@@ -81,16 +81,26 @@ void ImageAlbum::reloadImages()
     };
 }
 
+void ImageAlbum::Lines()
+{
+    emit SendType(DrawType::Lines);
+}
+
+void ImageAlbum::Freehand()
+{
+    emit SendType(DrawType::FreeHand);
+}
+
 void ImageAlbum::Thickness(int value)
 {
     penThickness = value;
-    emit SendInfo(paintColor, value);
+    emit SendThickness(penThickness);
 }
 
 void ImageAlbum::BrushColor()
 {
     paintColor = QColorDialog::getColor(paintColor, this);
-    emit SendInfo(paintColor, penThickness);
+    emit SendBrushColor(paintColor);
 }
 
 void ImageAlbum::ZoomIn()
@@ -122,7 +132,7 @@ void ImageAlbum::OrigImage()
 
     *selectImage = QPixmap(origImage->statusTip()).toImage();
     imageView->graphicsScene->addPixmap(QPixmap(origImage->statusTip()).scaled(imageView->width(), imageView->height(),
-                                                                               Qt::IgnoreAspectRatio, Qt::SmoothTransformation));
+                                                                               Qt::KeepAspectRatio, Qt::SmoothTransformation));
 }
 
 void ImageAlbum::selectItem(QListWidgetItem* item)
@@ -131,8 +141,8 @@ void ImageAlbum::selectItem(QListWidgetItem* item)
     selectImage = new QImage(ui->listWidget->currentItem()->statusTip());
     imageView->resetTransform();
     imageView->graphicsScene->clear();
-    imageView->graphicsScene->addPixmap(QPixmap(item->statusTip()).scaled(selectImage->width(), selectImage->height(),
-    Qt::IgnoreAspectRatio, Qt::SmoothTransformation));
+    imageView->graphicsScene->addPixmap(QPixmap(item->statusTip()).scaled(imageView->width(), imageView->height(),
+    Qt::KeepAspectRatio, Qt::SmoothTransformation));
 
     qDebug() << selectImage->width();
 }
@@ -145,7 +155,7 @@ void ImageAlbum::VReverse()
     QPixmap buf = QPixmap::fromImage(*selectImage);
     imageView->setScene(imageView->graphicsScene);
     imageView->graphicsScene->addPixmap(buf.scaled(imageView->width(), imageView->height(),
-                                                   Qt::IgnoreAspectRatio, Qt::SmoothTransformation));
+                                                   Qt::KeepAspectRatio, Qt::SmoothTransformation));
 }
 
 void ImageAlbum::HReverse()
@@ -156,7 +166,7 @@ void ImageAlbum::HReverse()
     QPixmap buf = QPixmap::fromImage(*selectImage);
     imageView->setScene(imageView->graphicsScene);
     imageView->graphicsScene->addPixmap(buf.scaled(imageView->width(), imageView->height(),
-                                                   Qt::IgnoreAspectRatio, Qt::SmoothTransformation));
+                                                   Qt::KeepAspectRatio, Qt::SmoothTransformation));
 }
 
 
@@ -188,7 +198,7 @@ void ImageAlbum::Brightness(int value)
     QPixmap buf = QPixmap::fromImage(image_brightness);
     imageView->setScene(imageView->graphicsScene);
     imageView->graphicsScene->addPixmap(buf.scaled(imageView->width(), imageView->height(),
-                                                   Qt::IgnoreAspectRatio, Qt::SmoothTransformation));
+                                                   Qt::KeepAspectRatio, Qt::SmoothTransformation));
 
     *selectImage = image_brightness.convertToFormat(QImage::Format_BGR888);
 }
@@ -220,7 +230,7 @@ void ImageAlbum::HistEqual()
     QPixmap buf = QPixmap::fromImage(image_Histogram);
     imageView->setScene(imageView->graphicsScene);
     imageView->graphicsScene->addPixmap(buf.scaled(imageView->width(), imageView->height(),
-                                                   Qt::IgnoreAspectRatio, Qt::SmoothTransformation));
+                                                   Qt::KeepAspectRatio, Qt::SmoothTransformation));
     *selectImage = image_Histogram.convertToFormat(QImage::Format_BGR888);
 }
 
@@ -250,7 +260,7 @@ void ImageAlbum::Reverse()
     QPixmap buf = QPixmap::fromImage(image_Reverse);
     imageView->setScene(imageView->graphicsScene);
     imageView->graphicsScene->addPixmap(buf.scaled(imageView->width(), imageView->height(),
-                                                   Qt::IgnoreAspectRatio, Qt::SmoothTransformation));
+                                                   Qt::KeepAspectRatio, Qt::SmoothTransformation));
     *selectImage = image_Reverse.convertToFormat(QImage::Format_BGR888);
 }
 
@@ -280,7 +290,7 @@ void ImageAlbum::Contrast(double value)
     QPixmap buf = QPixmap::fromImage(image_Contrast);
     imageView->setScene(imageView->graphicsScene);
     imageView->graphicsScene->addPixmap(buf.scaled(imageView->width(), imageView->height(),
-                                                   Qt::IgnoreAspectRatio, Qt::SmoothTransformation));
+                                                   Qt::KeepAspectRatio, Qt::SmoothTransformation));
     *selectImage = image_Contrast.convertToFormat(QImage::Format_BGR888);
 }
 
@@ -323,7 +333,7 @@ void ImageAlbum::Sobel()
 
     imageView->setScene(imageView->graphicsScene);
     imageView->graphicsScene->addPixmap(buf.scaled(imageView->width(), imageView->height(),
-                                                   Qt::IgnoreAspectRatio, Qt::SmoothTransformation));
+                                                   Qt::KeepAspectRatio, Qt::SmoothTransformation));
 }
 
 void ImageAlbum::Blur()
@@ -360,7 +370,7 @@ void ImageAlbum::Blur()
 
     imageView->setScene(imageView->graphicsScene);
     imageView->graphicsScene->addPixmap(buf.scaled(imageView->width(), imageView->height(),
-                                                   Qt::IgnoreAspectRatio, Qt::SmoothTransformation));
+                                                   Qt::KeepAspectRatio, Qt::SmoothTransformation));
     *selectImage = image_Blur.convertToFormat(QImage::Format_BGR888);
 }
 
@@ -396,13 +406,7 @@ void ImageAlbum::Sharpening()
 
     imageView->setScene(imageView->graphicsScene);
     imageView->graphicsScene->addPixmap(buf.scaled(imageView->width(), imageView->height(),
-                                                   Qt::IgnoreAspectRatio, Qt::SmoothTransformation));
+                                                   Qt::KeepAspectRatio, Qt::SmoothTransformation));
     *selectImage = image_Sharpen.convertToFormat(QImage::Format_BGR888);
 }
-
-
-
-
-
-
 

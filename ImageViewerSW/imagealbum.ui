@@ -141,14 +141,14 @@
        <item row="7" column="0">
         <widget class="QToolButton" name="Lines">
          <property name="text">
-          <string>선</string>
+          <string>그리기</string>
          </property>
         </widget>
        </item>
        <item row="7" column="1">
-        <widget class="QToolButton" name="Rectangle">
+        <widget class="QToolButton" name="Freehand">
          <property name="text">
-          <string>도형</string>
+          <string>폐곡선</string>
          </property>
         </widget>
        </item>
@@ -212,7 +212,11 @@
         </widget>
        </item>
        <item row="10" column="1">
-        <widget class="QSpinBox" name="Thickness"/>
+        <widget class="QSpinBox" name="Thickness">
+         <property name="value">
+          <number>10</number>
+         </property>
+        </widget>
        </item>
       </layout>
      </widget>

@@ -2,6 +2,7 @@
 #include "ui_mainwindow.h"
 #include "imagealbum.h"
 #include "patientinfo.h"
+#include "networkmanager.h"
 
 #include <QFileDialog>
 #include <QColorSpace>
@@ -18,6 +19,7 @@ MainWindow::MainWindow(QWidget *parent)
 
     m_patientInfo = new PatientInfo(this);
     m_imageAlbum = new ImageAlbum(this);
+    m_networkManager = new NetworkManager(this);
 
     QVBoxLayout *PatientLayout = new QVBoxLayout();
     PatientLayout->addWidget(m_patientInfo);

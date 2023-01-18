@@ -1,5 +1,5 @@
 
-QT       += core gui
+QT       += core gui network
 
 greaterThan(QT_MAJOR_VERSION, 4): QT += widgets
 
@@ -14,12 +14,16 @@ SOURCES += \
     imageview.cpp \
     main.cpp \
     mainwindow.cpp \
+    movableitem.cpp \
+    networkmanager.cpp \
     patientinfo.cpp
 
 HEADERS += \
     imagealbum.h \
     imageview.h \
     mainwindow.h \
+    movableitem.h \
+    networkmanager.h \
     patientinfo.h
 
 FORMS += \

@@ -5,10 +5,18 @@
 #include <QGraphicsItem>
 #include <QGraphicsSceneMouseEvent>
 #include <QWidget>
+#include <QBasicTimer>
 
 class QPinchGesture;
 class QGestureEvent;
 class ImageAlbum;
+class MovableItem;
+
+
+enum DrawType {
+    Lines,
+    FreeHand
+};
 
 class ImageView : public QGraphicsView
 {
@@ -22,7 +30,7 @@ public:
     void mouseReleaseEvent(QMouseEvent *event) Q_DECL_OVERRIDE;
     void wheelEvent(QWheelEvent *event) Q_DECL_OVERRIDE;
     bool event(QEvent *event) Q_DECL_OVERRIDE;
-    QGraphicsScene* graphicsScene;
+    QGraphicsScene* graphicsScene;  
 
 private:
     void pinchTriggered(QPinchGesture *gesture);
@@ -37,11 +45,26 @@ private:
     QGraphicsItem * lastRect;
     QColor m_penColor;
     int m_penThickness;
+    int m_drawType;
+
+
+    QPointF A, B, C;
+    int count;
+    QGraphicsEllipseItem* first;
+    QGraphicsEllipseItem* second;
+    QGraphicsEllipseItem* third;
+    QPainterPath *path1;
+
+
+
 
 private slots:
     void scalingTime(qreal);
     void animFinished();
-    void ReceiveInfo(const QColor&, int);
+
+    void ReceiveBrushColor(QColor);
+    void ReceiveThickness(int);
+    void ReceiveType(int);
 };
 
 #endif // IMAGEVIEW_H

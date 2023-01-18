@@ -63,10 +63,14 @@ public slots:
     void HistEqual();
     void Sharpening();
     void Thickness(int);
+    void Lines();
+    void Freehand();
 
 
 signals:
-    void SendInfo(const QColor&, int);
+    void SendBrushColor(QColor);
+    void SendThickness(int);
+    void SendType(int);
 };
 
 #endif // IMAGEALBUM_H

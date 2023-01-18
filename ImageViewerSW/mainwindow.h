@@ -16,6 +16,7 @@ QT_END_NAMESPACE
 class ImageView;
 class ImageAlbum;
 class PatientInfo;
+class NetworkManager;
 
 class MainWindow : public QMainWindow
 {
@@ -31,6 +32,7 @@ private:
     ImageAlbum* m_imageAlbum;
     PatientInfo* m_patientInfo;
     ImageView* m_imageView;
+    NetworkManager* m_networkManager;
 
 };
 #endif // MAINWINDOW_H
