@@ -102,6 +102,12 @@ void NetworkManager::receiveData()
             qDebug() << "로그인 정보" << id << data;
             emit sendLogInCheck(data);
         }
+
+        else if(event == "ISV")
+        {
+            qDebug() << "촬영 완료 정보" << id << data;
+            emit sendPhotoEnd(id);
+        }
     }
 }
 

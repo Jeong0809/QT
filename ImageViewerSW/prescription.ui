@@ -46,12 +46,12 @@
           <string>환자 ID</string>
          </property>
          <property name="buddy">
-          <cstring>lineEdit</cstring>
+          <cstring>PatientID</cstring>
          </property>
         </widget>
        </item>
        <item row="0" column="1">
-        <widget class="QLineEdit" name="lineEdit">
+        <widget class="QLineEdit" name="PatientID">
          <property name="font">
           <font>
            <pointsize>11</pointsize>
@@ -71,7 +71,7 @@
           <string>환자 이름</string>
          </property>
          <property name="buddy">
-          <cstring>lineEdit_2</cstring>
+          <cstring>PatientName</cstring>
          </property>
         </widget>
        </item>
@@ -87,7 +87,7 @@
           <string>담당의사 ID</string>
          </property>
          <property name="buddy">
-          <cstring>lineEdit_3</cstring>
+          <cstring>DoctorID</cstring>
          </property>
         </widget>
        </item>
@@ -103,7 +103,7 @@
           <string>담당의사</string>
          </property>
          <property name="buddy">
-          <cstring>lineEdit_4</cstring>
+          <cstring>DoctorName</cstring>
          </property>
         </widget>
        </item>
@@ -124,7 +124,7 @@
         </widget>
        </item>
        <item row="1" column="1">
-        <widget class="QLineEdit" name="lineEdit_2">
+        <widget class="QLineEdit" name="PatientName">
          <property name="font">
           <font>
            <pointsize>11</pointsize>
@@ -133,7 +133,7 @@
         </widget>
        </item>
        <item row="2" column="1">
-        <widget class="QLineEdit" name="lineEdit_3">
+        <widget class="QLineEdit" name="DoctorID">
          <property name="font">
           <font>
            <pointsize>11</pointsize>
@@ -142,7 +142,7 @@
         </widget>
        </item>
        <item row="3" column="1">
-        <widget class="QLineEdit" name="lineEdit_4">
+        <widget class="QLineEdit" name="DoctorName">
          <property name="font">
           <font>
            <pointsize>11</pointsize>

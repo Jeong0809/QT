@@ -1,3 +1,4 @@
+#include "ui_prescription.h"
 #include <QSplitter>
 #include <QListWidget>
 #include <QDir>
@@ -17,6 +18,7 @@ using namespace cv;
 #include "ui_imagealbum.h"
 #include "imageview.h"
 #include "imagescene.h"
+#include "prescription.h"
 
 #define LIMIT_UBYTE(n) (n > UCHAR_MAX) ? UCHAR_MAX:(n<0) ? 0 : n
 
@@ -26,6 +28,7 @@ ImageAlbum::ImageAlbum(QWidget *parent)
     ui->setupUi(this);
 
     imageView = new ImageView(this);
+    m_prescription = new Prescription(0);
 
     imageView->setGeometry(6, 6, 600, 600);
     imageView->setSizeAdjustPolicy(QAbstractScrollArea::AdjustToContents);
@@ -59,6 +62,9 @@ ImageAlbum::ImageAlbum(QWidget *parent)
     connect(this, SIGNAL(SendThickness(int)), imageView, SLOT(ReceiveThickness(int)));
     connect(this, SIGNAL(SendBrushColor(QColor)), imageView, SLOT(ReceiveBrushColor(QColor)));
     connect(this, SIGNAL(SendType(int)), imageView, SLOT(ReceiveType(int)));
+
+    connect(this, SIGNAL(sendPrescription(QString, QString, QString, QString)),
+            m_prescription, SLOT(receivePrescription(QString, QString, QString, QString)));
 
 
     reloadImages();
@@ -421,5 +427,26 @@ void ImageAlbum::Sharpening()
     imageView->graphicsScene->addPixmap(buf.scaled(imageView->width(), imageView->height(),
                                                    Qt::KeepAspectRatio, Qt::SmoothTransformation));
     *selectImage = image_Sharpen.convertToFormat(QImage::Format_BGR888);
+}
+
+
+void ImageAlbum::on_Prescription_clicked()
+{
+    emit sendPrescription(DoctorID, DoctorName, PatientID, PatientName);
+    m_prescription->show();
+}
+
+void ImageAlbum::receivePatientInfo(QString ID, QString Name)
+{
+    PatientID = ID;
+    PatientName = Name;
+    qDebug() << PatientName;
+}
+
+void ImageAlbum::receiveDoctorInfo(QString ID, QString Name)
+{
+    DoctorID = ID;
+    DoctorName = Name;
+    qDebug() << Name;
 }
 

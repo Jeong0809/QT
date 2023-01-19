@@ -1,6 +1,7 @@
 #ifndef MAINWINDOW_H
 #define MAINWINDOW_H
 
+#include "prescription.h"
 #include <QMainWindow>
 #include <QLabel>
 #include <QScrollArea>
@@ -19,6 +20,7 @@ class PatientInfo;
 class NetworkManager;
 class LoginForm;
 
+
 class MainWindow : public QMainWindow
 {
     Q_OBJECT
@@ -35,5 +37,8 @@ private:
     ImageView* m_imageView;
     NetworkManager* m_networkManager;
     LoginForm* m_logIn;
+
+private slots:
+    void ViewerOpen(QString, QString);
 };
 #endif // MAINWINDOW_H

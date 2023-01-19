@@ -282,7 +282,7 @@
    <item row="1" column="1">
     <layout class="QHBoxLayout" name="horizontalLayout_2">
      <item>
-      <widget class="QPushButton" name="pushButton">
+      <widget class="QPushButton" name="Prescription">
        <property name="text">
         <string>처방전
 작성</string>

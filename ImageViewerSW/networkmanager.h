@@ -41,6 +41,7 @@ signals:
     void sendSelectPatient(QString, QString);
     void sendPMSCameraPatient(QString, QString);
     void sendLogInCheck(QString);
+    void sendPhotoEnd(QString);
 };
 
 #endif // NETWORKMANAGER_H

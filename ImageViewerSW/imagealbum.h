@@ -18,6 +18,7 @@ class QListWidget;
 class QListWidgetItem;
 class QGroupBox;
 class ImageScene;
+class Prescription;
 
 
 namespace Ui {
@@ -45,8 +46,12 @@ private:
     QColor paintColor;
     int penThickness;
 
+    Prescription* m_prescription;
+    QString DoctorID;
+    QString DoctorName;
+    QString PatientID;
+    QString PatientName;
 
-    ImageScene* Test;
 
 public slots:
     void reloadImages();
@@ -71,11 +76,18 @@ public slots:
     void Freehand();
     void Triangle();
 
+    void receiveDoctorInfo(QString, QString);
+    void receivePatientInfo(QString, QString);
+
 
 signals:
     void SendBrushColor(QColor);
     void SendThickness(int);
     void SendType(int);
+    void sendPrescription(QString, QString, QString, QString);
+
+private slots:
+    void on_Prescription_clicked();
 };
 
 #endif // IMAGEALBUM_H

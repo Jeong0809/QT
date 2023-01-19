@@ -14,6 +14,25 @@ PatientInfo::~PatientInfo()
     delete ui;
 }
 
+void PatientInfo::receivePhotoEnd(QString ID)
+{
+    //환자의 ID로 WaitingList에서 검색하여 해당 환자의 진행 상황을 "촬영중"으로 변경
+    int i = 0;  //0번째 열 (환자 ID)
+    auto flag = Qt::MatchCaseSensitive|Qt::MatchContains;
+    auto items = ui->WaitingList->findItems(ID, flag, i);
+
+    foreach(auto i, items) {
+        QTreeWidgetItem* c = static_cast<QTreeWidgetItem*>(i);
+        c->setText(2, "대기중");
+    }
+}
+
+void PatientInfo::receiveDoctorName(QString DoctorID, QString DoctorName)
+{
+    ui->lineEdit->setText(DoctorName);
+    ui->lineEdit->setReadOnly(true);
+}
+
 void PatientInfo::receiveWaitingList(QString ID, QString Name)
 {
     QTreeWidgetItem* item = new QTreeWidgetItem;
@@ -64,6 +83,7 @@ void PatientInfo::on_Treatmentstart_clicked()
     qDebug() << "진료 시작";
     QString Data = "VTS<CR>" + selectPatientID + "<CR>" + "";
     emit sendWaitingPatient(Data);
+    emit sendPatientInfo(selectPatientID, selectPatientName);
 
     int i = 0;  //0번째 열 (환자 ID)
     auto flag = Qt::MatchCaseSensitive|Qt::MatchContains;
@@ -75,7 +95,6 @@ void PatientInfo::on_Treatmentstart_clicked()
     }
 
 }
-
 
 void PatientInfo::on_Camerastart_clicked()
 {

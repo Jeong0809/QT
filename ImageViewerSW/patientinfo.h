@@ -18,7 +18,6 @@ public:
 
 private:
     Ui::PatientInfo *ui;
-//    QTreeWidgetItem* selectPatient;
     QString selectPatientID;
     QString selectPatientName;
     QString patientID;
@@ -36,9 +35,13 @@ private slots:
 
     void on_Camerastart_clicked();
 
+    void receiveDoctorName(QString, QString);
+    void receivePhotoEnd(QString);
+
 signals:
     void sendWaitingPatient(QString);
     void sendCameraPatient(QString);
+    void sendPatientInfo(QString, QString);
 };
 
 #endif // PATIENTINFO_H

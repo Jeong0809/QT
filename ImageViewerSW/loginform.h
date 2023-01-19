@@ -21,6 +21,7 @@ private slots:
 
 signals:
     void SendDoctorCheck(QString);
+    void LogInSuccess(QString, QString);
 
 private:
     Ui::LoginForm *ui;
