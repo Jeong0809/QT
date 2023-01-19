@@ -16,6 +16,7 @@ using namespace cv;
 #include "imagealbum.h"
 #include "ui_imagealbum.h"
 #include "imageview.h"
+#include "imagescene.h"
 
 #define LIMIT_UBYTE(n) (n > UCHAR_MAX) ? UCHAR_MAX:(n<0) ? 0 : n
 
@@ -25,10 +26,12 @@ ImageAlbum::ImageAlbum(QWidget *parent)
     ui->setupUi(this);
 
     imageView = new ImageView(this);
+
     imageView->setGeometry(6, 6, 600, 600);
     imageView->setSizeAdjustPolicy(QAbstractScrollArea::AdjustToContents);
     imageView->setDragMode(QGraphicsView::NoDrag);
     ui->gridLayout->addWidget(imageView);
+    imageView->setAlignment(Qt::AlignCenter);
 
     connect(ui->listWidget, SIGNAL(itemDoubleClicked(QListWidgetItem*)), SLOT(selectItem(QListWidgetItem*)));
     connect(ui->ZoomIn, SIGNAL(clicked()), this, SLOT(ZoomIn()));
@@ -49,6 +52,7 @@ ImageAlbum::ImageAlbum(QWidget *parent)
     connect(ui->Thickness, SIGNAL(valueChanged(int)), this, SLOT(Thickness(int)));
     connect(ui->Lines, SIGNAL(clicked()), this, SLOT(Lines()));
     connect(ui->Freehand, SIGNAL(clicked()), this, SLOT(Freehand()));
+    connect(ui->Triangle, SIGNAL(clicked()), this, SLOT(Triangle()));
 
 
     /*GraphicsView에 펜 색상, 펜 두께, 선인지 도형인지를 구분하여 시그널 전송*/
@@ -71,7 +75,6 @@ void ImageAlbum::reloadImages()
     QStringList filters;
     filters << "*.png" << "*.jpg" << "*.bmp" << "*.gif";
     QFileInfoList fileInfoList = dir.entryInfoList(filters, QDir::Files | QDir::NoDotAndDotDot);
-    imageView->graphicsScene->clear();
 
     ui->listWidget->clear();
     for(int i = 0; i < fileInfoList.count(); i++) {
@@ -79,6 +82,11 @@ void ImageAlbum::reloadImages()
         item->setStatusTip(fileInfoList.at(i).fileName());
         ui->listWidget->addItem(item);
     };
+}
+
+void ImageAlbum::Triangle()
+{
+    emit SendType(DrawType::Triangle);
 }
 
 void ImageAlbum::Lines()
@@ -130,19 +138,24 @@ void ImageAlbum::OrigImage()
     ui->horizontalSlider->setSliderPosition(0);
     ui->Contrast->setValue(1.0);
 
-    *selectImage = QPixmap(origImage->statusTip()).toImage();
-    imageView->graphicsScene->addPixmap(QPixmap(origImage->statusTip()).scaled(imageView->width(), imageView->height(),
+    *selectImage = QPixmap(orignal->statusTip()).toImage();
+    imageView->graphicsScene->addPixmap(QPixmap(orignal->statusTip()).scaled(imageView->width(), imageView->height(),
                                                                                Qt::KeepAspectRatio, Qt::SmoothTransformation));
 }
 
 void ImageAlbum::selectItem(QListWidgetItem* item)
 {
-    origImage = item;
+    imageView->setAlignment(Qt::AlignCenter);
+
+    orignal = item;
+    origImage = new QImage(ui->listWidget->currentItem()->statusTip());
     selectImage = new QImage(ui->listWidget->currentItem()->statusTip());
     imageView->resetTransform();
     imageView->graphicsScene->clear();
+
     imageView->graphicsScene->addPixmap(QPixmap(item->statusTip()).scaled(imageView->width(), imageView->height(),
     Qt::KeepAspectRatio, Qt::SmoothTransformation));
+    imageView->setAlignment(Qt::AlignCenter);
 
     qDebug() << selectImage->width();
 }
@@ -153,7 +166,7 @@ void ImageAlbum::VReverse()
     selectImage->mirror(true, false);
 
     QPixmap buf = QPixmap::fromImage(*selectImage);
-    imageView->setScene(imageView->graphicsScene);
+//    imageView->setScene(imageView->graphicsScene);
     imageView->graphicsScene->addPixmap(buf.scaled(imageView->width(), imageView->height(),
                                                    Qt::KeepAspectRatio, Qt::SmoothTransformation));
 }
@@ -200,7 +213,7 @@ void ImageAlbum::Brightness(int value)
     imageView->graphicsScene->addPixmap(buf.scaled(imageView->width(), imageView->height(),
                                                    Qt::KeepAspectRatio, Qt::SmoothTransformation));
 
-    *selectImage = image_brightness.convertToFormat(QImage::Format_BGR888);
+//    *selectImage = image_brightness.convertToFormat(QImage::Format_BGR888);
 }
 
 void ImageAlbum::HistEqual()
@@ -291,7 +304,7 @@ void ImageAlbum::Contrast(double value)
     imageView->setScene(imageView->graphicsScene);
     imageView->graphicsScene->addPixmap(buf.scaled(imageView->width(), imageView->height(),
                                                    Qt::KeepAspectRatio, Qt::SmoothTransformation));
-    *selectImage = image_Contrast.convertToFormat(QImage::Format_BGR888);
+//    *selectImage = image_Contrast.convertToFormat(QImage::Format_BGR888);
 }
 
 void ImageAlbum::Sobel()

@@ -17,6 +17,7 @@ class QGraphicsScene;
 class QListWidget;
 class QListWidgetItem;
 class QGroupBox;
+class ImageScene;
 
 
 namespace Ui {
@@ -37,12 +38,15 @@ private:
     QListWidget* listWidget;
     QGroupBox* groupBox;
     ImageView* imageView;
-    QListWidgetItem* origImage;
-
+    QListWidgetItem* orignal;
+    QImage* origImage;
     QImage* selectImage;
     QImage* origBrightness;
     QColor paintColor;
     int penThickness;
+
+
+    ImageScene* Test;
 
 public slots:
     void reloadImages();
@@ -65,6 +69,7 @@ public slots:
     void Thickness(int);
     void Lines();
     void Freehand();
+    void Triangle();
 
 
 signals:

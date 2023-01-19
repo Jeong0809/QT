@@ -11,25 +11,33 @@ CONFIG += c++17
 
 SOURCES += \
     imagealbum.cpp \
+    imagescene.cpp \
     imageview.cpp \
+    loginform.cpp \
     main.cpp \
     mainwindow.cpp \
     movableitem.cpp \
     networkmanager.cpp \
-    patientinfo.cpp
+    patientinfo.cpp \
+    prescription.cpp
 
 HEADERS += \
     imagealbum.h \
+    imagescene.h \
     imageview.h \
+    loginform.h \
     mainwindow.h \
     movableitem.h \
     networkmanager.h \
-    patientinfo.h
+    patientinfo.h \
+    prescription.h
 
 FORMS += \
     imagealbum.ui \
+    loginform.ui \
     mainwindow.ui \
-    patientinfo.ui
+    patientinfo.ui \
+    prescription.ui
 
 # Default rules for deployment.
 qnx: target.path = /tmp/$${TARGET}/bin

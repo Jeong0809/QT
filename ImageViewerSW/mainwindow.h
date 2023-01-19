@@ -17,6 +17,7 @@ class ImageView;
 class ImageAlbum;
 class PatientInfo;
 class NetworkManager;
+class LoginForm;
 
 class MainWindow : public QMainWindow
 {
@@ -33,6 +34,6 @@ private:
     PatientInfo* m_patientInfo;
     ImageView* m_imageView;
     NetworkManager* m_networkManager;
-
+    LoginForm* m_logIn;
 };
 #endif // MAINWINDOW_H
