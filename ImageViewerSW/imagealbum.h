@@ -33,7 +33,6 @@ public:
     explicit ImageAlbum(QWidget *parent = nullptr);
     ~ImageAlbum();
 
-
 private:
     Ui::ImageAlbum *ui;
     QListWidget* listWidget;
@@ -78,6 +77,7 @@ public slots:
 
     void receiveDoctorInfo(QString, QString);
     void receivePatientInfo(QString, QString);
+    void receivePrescriptionFinish(QString);
 
 
 signals:
@@ -85,9 +85,12 @@ signals:
     void SendThickness(int);
     void SendType(int);
     void sendPrescription(QString, QString, QString, QString);
+    void sendPrescriptiontoServer(QString);
+    void sendEndTreatment(QString);
 
 private slots:
     void on_Prescription_clicked();
+    void on_EndTreatment_clicked();
 };
 
 #endif // IMAGEALBUM_H

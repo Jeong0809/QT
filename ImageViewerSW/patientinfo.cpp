@@ -14,6 +14,24 @@ PatientInfo::~PatientInfo()
     delete ui;
 }
 
+//진료 완료 버튼 클릭 시 해당 환자의 정보 받음
+void PatientInfo::receiveEndTreatment(QString Data)
+{
+    qDebug() << "진료 완료" << Data;
+    QString event = Data.split("<CR>")[0];
+    QString ID = Data.split("<CR>")[1];
+
+    int i = 0;  //0번째 열 (환자 ID)
+    auto flag = Qt::MatchCaseSensitive|Qt::MatchContains;
+    auto items = ui->WaitingList->findItems(ID, flag, i);
+
+    foreach(auto i, items) {
+        QTreeWidgetItem* c = static_cast<QTreeWidgetItem*>(i);
+        ui->WaitingList->takeTopLevelItem(ui->WaitingList->indexOfTopLevelItem(c));
+    }
+
+}
+
 void PatientInfo::receivePhotoEnd(QString ID)
 {
     //환자의 ID로 WaitingList에서 검색하여 해당 환자의 진행 상황을 "촬영중"으로 변경
@@ -70,19 +88,22 @@ void PatientInfo::receivePMSCameraPatient(QString ID, QString data)
     }
 }
 
+//대기 리스트에서 환자가 선택되면 해당 환자ID, 환자 이름을 전송하기 위해 멤버 변수에 저장
 void PatientInfo::on_WaitingList_itemClicked(QTreeWidgetItem *item, int column)
 {
     selectPatientID = item->text(0);
     selectPatientName = item->text(1);
-    qDebug() << item->text(0);
 }
 
 
+//진료 시작 버튼 클릭 시 대기 환자 리스트에서 선택된 환자의 진행 상황을 진료중으로 변경
 void PatientInfo::on_Treatmentstart_clicked()
 {
     qDebug() << "진료 시작";
     QString Data = "VTS<CR>" + selectPatientID + "<CR>" + "";
     emit sendWaitingPatient(Data);
+
+    //대기 리스트에서 선택된 환자ID, 환자 이름을 전송 및 해당 환자 진료 시작
     emit sendPatientInfo(selectPatientID, selectPatientName);
 
     int i = 0;  //0번째 열 (환자 ID)
@@ -93,13 +114,11 @@ void PatientInfo::on_Treatmentstart_clicked()
         QTreeWidgetItem* c = static_cast<QTreeWidgetItem*>(i);
         c->setText(2, "진료중");
     }
-
 }
 
 void PatientInfo::on_Camerastart_clicked()
 {
     qDebug() << "촬영 시작";
-
     QString Photo;
     Ceph = ui->Ceph->isChecked();
     Pano = ui->Pano->isChecked();
@@ -118,14 +137,12 @@ void PatientInfo::on_Camerastart_clicked()
     }
     else
     {
-        QMessageBox:: critical(this, "경고",
-                              "CEPH/PANO 중 하나 이상을 선택하세요.");
+        QMessageBox:: critical(this, "경고", "CEPH/PANO 중 하나 이상을 선택하세요.");
         return;
     }
 
-
     QString Data = "SRQ<CR>" + patientID + "<CR>" + patientName + "|" + Photo;
-    qDebug() << Data;
+
     emit sendCameraPatient(Data);
 
     //환자의 ID로 WaitingList에서 검색하여 해당 환자의 진행 상황을 "촬영중"으로 변경

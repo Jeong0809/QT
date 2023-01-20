@@ -63,8 +63,12 @@ ImageAlbum::ImageAlbum(QWidget *parent)
     connect(this, SIGNAL(SendBrushColor(QColor)), imageView, SLOT(ReceiveBrushColor(QColor)));
     connect(this, SIGNAL(SendType(int)), imageView, SLOT(ReceiveType(int)));
 
+    //처방전 작성 버튼 클릭 시 처방전 클래스로 의사 정보, 환자 정보를 전송
     connect(this, SIGNAL(sendPrescription(QString, QString, QString, QString)),
             m_prescription, SLOT(receivePrescription(QString, QString, QString, QString)));
+
+    //처방전 클래스에서 처방전 작성 완료 되면 해당 내용을 서버로 보내주기 위한 과정
+    connect(m_prescription, SIGNAL(sendPrescriptionFinish(QString)), this, SLOT(receivePrescriptionFinish(QString)));
 
 
     reloadImages();
@@ -432,6 +436,7 @@ void ImageAlbum::Sharpening()
 
 void ImageAlbum::on_Prescription_clicked()
 {
+    //처방전 작성 버튼 클릭 시 의사 정보, 환자 정보를 처방전 클래스로 전송
     emit sendPrescription(DoctorID, DoctorName, PatientID, PatientName);
     m_prescription->show();
 }
@@ -440,13 +445,23 @@ void ImageAlbum::receivePatientInfo(QString ID, QString Name)
 {
     PatientID = ID;
     PatientName = Name;
-    qDebug() << PatientName;
 }
 
 void ImageAlbum::receiveDoctorInfo(QString ID, QString Name)
 {
     DoctorID = ID;
     DoctorName = Name;
-    qDebug() << Name;
+}
+
+void ImageAlbum::receivePrescriptionFinish(QString Data)
+{
+    emit sendPrescriptiontoServer(Data);
+    m_prescription->close();
+}
+
+void ImageAlbum::on_EndTreatment_clicked()
+{
+    QString Data = "VTF<CR>" + PatientID + "<CR>" + PatientName;
+    emit sendEndTreatment(Data);
 }
 

@@ -22,10 +22,14 @@ private:
     QString DoctorName;
     QString PatientID;
     QString PatientName;
+    QString CurrentDate;
 
 private slots:
     void receivePrescription(QString, QString, QString, QString);
+    void on_Finish_clicked();
 
+signals:
+    void sendPrescriptionFinish(QString);
 };
 
 #endif // PRESCRIPTION_H

@@ -37,6 +37,7 @@ private slots:
 
     void receiveDoctorName(QString, QString);
     void receivePhotoEnd(QString);
+    void receiveEndTreatment(QString);
 
 signals:
     void sendWaitingPatient(QString);
