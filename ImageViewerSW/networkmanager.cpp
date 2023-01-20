@@ -22,7 +22,6 @@ NetworkManager::NetworkManager(QObject *parent)
         QByteArray sendTest = connectData.toStdString().data();
         socket->write(sendTest);
     }
-
 }
 
 bool NetworkManager::connectToHost(QString host)
