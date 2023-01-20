@@ -7,229 +7,168 @@
 #include <QPinchGesture>
 #include <QGraphicsItem>
 
+#define ItemWidth   16
 
 ImageScene::ImageScene(QWidget *parent)
     : QGraphicsScene(parent)
 {
-//    graphicsScene = new QGraphicsScene(this);
 
-//    _pan = false;
-//    _currentStepScaleFactor = 1;
+    QPainterPath path;
+    m_pathItem = addPath(path);
 
-//    //펜의 색상, 두께의 초깃값 설정
-//    m_penColor = Qt::black;
-//    m_penThickness = 10;
+    //펜의 색상, 두께의 초깃값 설정
+    m_penColor = Qt::black;
+    m_penThickness = 10;
+
+//    resetTransform();
+//    setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
+//    setVerticalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
+
+
 }
 
-//void ImageScene::ReceiveType(int type)
-//{
-//    m_drawType = type;
-//    qDebug() << "ImageView : " << m_drawType;
-//}
+void ImageScene::ReceiveType(int type)
+{
+    m_drawType = Lines;
+    qDebug() << "ImageView : " << m_drawType;
+}
 
-//void ImageScene::ReceiveBrushColor(QColor paintColor)
-//{
-//    m_penColor = paintColor;
-//    qDebug() << "ImageView : " << m_penColor;
-//}
+void ImageScene::ReceiveBrushColor(QColor paintColor)
+{
+    m_penColor = paintColor;
+    qDebug() << "ImageView : " << m_penColor;
+}
 
-//void ImageScene::ReceiveThickness(int Thickness)
-//{
-//    m_penThickness = Thickness;
-//    qDebug() << "ImageView : " << m_penThickness;
-//}
+void ImageScene::ReceiveThickness(int Thickness)
+{
+    m_penThickness = Thickness;
+    qDebug() << "ImageView : " << m_penThickness;
+}
 
 void ImageScene::mousePressEvent(QGraphicsSceneMouseEvent *event)
 {
-    qDebug("Hi!!!!!!!!!!!!!!!!!!!!!!");
-////    A = mapToScene(event->pos());
+    qDebug("mousePressEvent");
+    if(items(event->scenePos()).isEmpty()) {
+        if(m_drawType == Lines) {
+            m_isDrawable = true;
 
-//    switch (m_drawType) {
-//    case DrawType::Lines:
-//        //일반 선 그리기
-//        if (event->button() == Qt::LeftButton) {
-//            startPos = event->pos();
-////            setCursor(Qt::ClosedHandCursor);
-//            _pan = true;
-//            event->accept();
-//            return;
+            QPainterPath path;
+            QGraphicsPathItem* item = addPath(path, QPen(Qt::NoPen), QBrush(m_penColor));
+
+            path = item->path();
+            path.moveTo(event->scenePos());
+            item->setPath(path);
+
+            m_pathList.append(item);
+        }
+//        else if(m_drawType != Cursor) {
+//            m_startPos = event->scenePos();
 //        }
-//        break;
-
-//    case DrawType::FreeHand:
-//        //닫힌 선 그리기
-//        if (event->button() == Qt::LeftButton) {
-//                A = event->pos();
-//            startPos = event->pos();
-////            setCursor(Qt::ClosedHandCursor);
-//            _pan = true;
-//            event->accept();
-//            return;
-//        }
-//        break;
-
-//    case DrawType::Triangle:
-
-//        qDebug() << "첫번째 점";
-//        switch (count) {
-//        case 0:
-//            A = event->pos();
-//            first = graphicsScene->addEllipse(A.x()-5, A.y()-5, 10, 10,
-//                                              QPen(Qt::NoPen),
-//                                              QBrush(m_penColor));
-//            break;
-
-//        case 1: {
-//            B = event->pos();
-//            second = graphicsScene->addEllipse(B.x()-5, B.y()-5, 10, 10,
-//                                               QPen(Qt::NoPen),
-//                                               QBrush(m_penColor));
-
-//            /* Draw AB line */
-//            QPainterPath path(A);
-//            path.quadTo(A, B);
-//            graphicsScene->addPath(path, QColorConstants::Svg::red);
-//        }
-//            break;
-//        case 2: {
-//            C = event->pos();
-//            third = graphicsScene->addEllipse(C.x()-5, C.y()-5, 10, 10,
-//                                              QPen(Qt::NoPen),
-//                                              QBrush(m_penColor));
-//            /* Draw BC line */
-//            QPainterPath path(B);
-//            path.quadTo(B, C);
-//            graphicsScene->addPath(path,  QColorConstants::Svg::red);
-
-//            /* Draw ABBC cubic Bezier curve */
-//            QPainterPath path2(C);
-//            path2.quadTo(C, A);
-
-//            graphicsScene->addPath(path2,  QColorConstants::Svg::red);
-//        }
-//            break;
-//        default:
-//            break;
-//        }
-//        if (count >= 2) {
-//            count = 0;
-//        } else {
-//            count++;
-//        }
-//        break;
-
-//    default:
-//        break;
     }
+    QGraphicsScene::mousePressEvent(event);
+}
 
+void ImageScene::mouseReleaseEvent(QGraphicsSceneMouseEvent *event)
+{
+    qDebug("mouseReleaseEvent");
+    Q_UNUSED(event);
 
+//    if(m_currentItem != nullptr)
+//        delete m_currentItem;
 
-
-
-
-
-////    if (event->button() == Qt::LeftButton) {
-////        startPos = mapToScene(event->pos());
-////        //        graphicsScene->addRect(startPos.x(), startPos.y(),
-////        //                               50, 50,
-////        //                               QPen(Qt::NoPen),
-////        //                               QBrush(m_penColor));
-////        setCursor(Qt::ClosedHandCursor);
-////        _pan = true;
-////        event->accept();
-////        return;
-////    }
-
-//    event->ignore();
-//}
-
-//void ImageScene::mouseReleaseEvent(QGraphicsSceneMouseEvent *event)
-//{
-//    qDebug("mouseReleaseEvent");
-
-//    switch (m_drawType) {
-//    case DrawType::Lines:
-//        //일반 선 그리기
-//        if(_pan){
-////            setCursor(Qt::ArrowCursor);
-//            event->accept();
-//        }
+    switch (m_drawType) {
+//    case Cursor:
 //        break;
-
-//    case DrawType::FreeHand:
-//        //닫힌 선 그리기
-//        if(_pan){
-////            setCursor(Qt::ArrowCursor);
-//            C = event->pos();
-//            QPainterPath path2(C);
-//            path2.quadTo(C, A);
-//            graphicsScene->addPath(path2,  QPen(m_penColor, m_penThickness,
-//                                                Qt::SolidLine, Qt::RoundCap));
-//            event->accept();
-//        }
+//    case Line:
+//        addLineItem(m_startPos, mouseEvent->scenePos());
 //        break;
-
-//    case DrawType::Triangle:
+//    case Rect:
+//        addRectItem(m_startPos, mouseEvent->scenePos());
 //        break;
-
-//    default:
+//    case Ellipse:
+//        addEllipseItem(m_startPos, mouseEvent->scenePos());
+//        break;
+    case Lines:
+        if(m_isDrawable) {
+            QGraphicsPathItem* item = m_pathList.last();
+            if(item) {
+                QPainterPath path = item->path();
+                path.lineTo(event->scenePos());
+                item->setPath(path);
+                item->setFlag(QGraphicsItem::ItemIsMovable, true);
+                item->setFlag(QGraphicsItem::ItemIsSelectable, true);
+            }
+            m_isDrawable = false;
+        }
+        break;
+//    case Image:
+//        addImageItem(m_startPos, mouseEvent->scenePos());
+//        break;
+//    case Star:
+//        addStarItem(m_startPos, mouseEvent->scenePos());
 //        break;
 //    }
+//    m_currentItem = nullptr;
+    }
+    QGraphicsScene::mouseReleaseEvent(event);
+}
 
+void ImageScene::mouseMoveEvent(QGraphicsSceneMouseEvent *event)
+{
+    qDebug("mouseMoveEvent");
+    if(m_drawType == Lines) {
+        if(m_isDrawable) {
+            QGraphicsPathItem* item = m_pathList.last();
+            if(item) {
+                QPainterPath path = item->path();
+                path.lineTo(event->scenePos());
+                item->setPath(path);
+            }
+        }
+    }
+    /*else if(m_currentShape == Line) {
+        if(m_currentItem != nullptr)
+            delete m_currentItem;
+        QLineF line(m_startPos, mouseEvent->scenePos());
+        QGraphicsLineItem *item = new QGraphicsLineItem(line);
+        item->setPen(QPen(QColor(Qt::red), 1));
+        addItem(item);
+        m_currentItem = item;
+    } else if(m_currentShape != Cursor) {
+        if(m_currentItem != nullptr)
+            delete m_currentItem;
+        QRectF rect(m_startPos, mouseEvent->scenePos());
+        QGraphicsRectItem *item = new QGraphicsRectItem(rect);
+        item->setPen(QPen(QColor(Qt::red), 1));
+        addItem(item);
+        m_currentItem = item;
+    }*/
+    QGraphicsScene::mouseMoveEvent(event);
+}
 
+void ImageScene::updateSceneeee()
+{
+    qDebug("updateScene");
+//    QPen pen(m_penColor, m_penThickness);
+//    m_pathItem->setPen(pen);
+////    m_pathItem->setBrush(Qt::transparent);
+//    QPainterPath path = m_pathItem->path();
 
-
-//    _pan = false;
-//    event->ignore();
-//}
-
-//void ImageScene::mouseMoveEvent(QGraphicsSceneMouseEvent *event)
-//{
-//    qDebug("mouseMoveEvent");
-
-////    this->setDragMode(QGraphicsView::NoDrag);
-//    QPointF newPos = event->pos();
-
-//    switch (m_drawType) {
-//    case DrawType::Lines:
-//        //일반 선 그리기
-//        if(_pan){
-//            graphicsScene->addLine(startPos.x(), startPos.y(),
-//                                   newPos.x(), newPos.y(),
-//                                   QPen(m_penColor, m_penThickness, Qt::SolidLine, Qt::RoundCap));
-//            event->accept();
+//    int cnt = 0;
+//    path.clear();
+//    foreach(auto item, m_itemList) {
+////        qDebug() << item->scenePos();
+//        QPointF p = item->scenePos();
+//        if(cnt++ == 0) {
+//            path.moveTo(p.rx()+ItemWidth/2, p.ry()+ItemWidth/2);
+//        } else {
+//            path.lineTo(p.rx()+ItemWidth/2, p.ry()+ItemWidth/2);
 //        }
-//        break;
 
-//    case DrawType::FreeHand:
-//        //닫힌 선 그리기
-//        if(_pan){
-//            graphicsScene->addLine(startPos.x(), startPos.y(),
-//                                   newPos.x(), newPos.y(),
-//                                   QPen(m_penColor, m_penThickness, Qt::SolidLine, Qt::RoundCap));
-//            event->accept();
-//        }
-//        break;
-
-//    case DrawType::Triangle:
-//        break;
-
-
-//    default:
-//        break;
 //    }
-
-////    if(_pan){
-//////        graphicsScene->addLine(startPos.x(), startPos.y(),
-//////                               newPos.x(), newPos.y(),
-//////                               QPen(m_penColor, m_penThickness, Qt::SolidLine, Qt::RoundCap));
-//////        first->setPos(mapToScene(event->pos().x(), event->pos().y()));
-////        event->accept();
-////    }
-
-//    event->ignore();
-//    startPos = newPos;
-//}
+//    path.closeSubpath();
+//    m_pathItem->setPath(path);
+}
 
 //void ImageScene::wheelEvent(QGraphicsSceneWheelEvent *event)
 //{
@@ -265,7 +204,7 @@ void ImageScene::mousePressEvent(QGraphicsSceneMouseEvent *event)
 //{
 //    if (event->type() == QEvent::Gesture)
 //        return gestureEvent(static_cast<QGestureEvent*>(event));
-//    return /*QGraphicsView::event(event)*/1;
+//    return QGraphicsScene::event(event);
 //}
 
 //bool ImageScene::gestureEvent(QGestureEvent *event)

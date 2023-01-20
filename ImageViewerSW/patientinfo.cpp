@@ -31,13 +31,12 @@ void PatientInfo::receiveEndTreatment(QString Data)
         ui->WaitingList->takeTopLevelItem(ui->WaitingList->indexOfTopLevelItem(c));
     }
 
-    //이거 확인해보기!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-    ui->tableWidget->setHorizontalHeaderItem(0, new QTableWidgetItem(""));
-//    ui->tableWidget->setItem(0, 0, new QTableWidgetItem(""));
-//    ui->tableWidget->setItem(0, 1, new QTableWidgetItem(""));
-//    ui->tableWidget->setItem(0, 2, new QTableWidgetItem(""));
-//    ui->tableWidget->setItem(0, 3, new QTableWidgetItem(""));
-//    ui->tableWidget->setItem(0, 4, new QTableWidgetItem(""));
+    //진료 완료 버튼 클릭시 환자 정보 테이블 위젯을 비워줌
+    ui->tableWidget->setItem(0, 0, new QTableWidgetItem(""));
+    ui->tableWidget->setItem(0, 1, new QTableWidgetItem(""));
+    ui->tableWidget->setItem(0, 2, new QTableWidgetItem(""));
+    ui->tableWidget->setItem(0, 3, new QTableWidgetItem(""));
+    ui->tableWidget->setItem(0, 4, new QTableWidgetItem(""));
 }
 
 void PatientInfo::receivePhotoEnd(QString ID)

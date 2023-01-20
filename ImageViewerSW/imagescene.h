@@ -9,14 +9,8 @@
 
 class QPinchGesture;
 class QGestureEvent;
-class ImageAlbum;
 class MovableItem;
 
-enum DrawType {
-    Lines,
-    FreeHand,
-    Triangle
-};
 
 class ImageScene : public QGraphicsScene
 {
@@ -25,43 +19,38 @@ public:
     explicit ImageScene(QWidget *parent = 0);
 
 public:
-//    void mouseMoveEvent(QGraphicsSceneMouseEvent *event) Q_DECL_OVERRIDE;
+    void mouseMoveEvent(QGraphicsSceneMouseEvent *event) Q_DECL_OVERRIDE;
     void mousePressEvent(QGraphicsSceneMouseEvent *event) Q_DECL_OVERRIDE;
-//    void mouseReleaseEvent(QGraphicsSceneMouseEvent *event) Q_DECL_OVERRIDE;
+    void mouseReleaseEvent(QGraphicsSceneMouseEvent *event) Q_DECL_OVERRIDE;
 //    void wheelEvent(QGraphicsSceneWheelEvent *event) Q_DECL_OVERRIDE;
 //    bool event(QEvent *event) Q_DECL_OVERRIDE;
-//    QGraphicsScene* graphicsScene;
+
+    enum DrawType {
+        Lines,
+        FreeHand,
+        Triangle
+    };
 
 private:
 //    void pinchTriggered(QPinchGesture *gesture);
 //    bool gestureEvent(QGestureEvent *event);
-
-//    bool _pan;
-//    int _panStartX, _panStartY;
-//    int _numScheduledScalings;
-//    int _currentStepScaleFactor;
-//    int _scaleFactor, _rotationAngle;
-//    QPointF startPos;
-//    QGraphicsItem * lastRect;
-//    QColor m_penColor;
-//    int m_penThickness;
-//    int m_drawType;
+     bool m_isDrawable;
+     DrawType m_drawType;
+     QColor m_penColor;
+     int m_penThickness;
+     QList<QGraphicsPathItem*> m_pathList;
 
 
-//    QPointF A, B, C;
-//    int count;
-//    QGraphicsEllipseItem* first;
-//    QGraphicsEllipseItem* second;
-//    QGraphicsEllipseItem* third;
-//    QPainterPath *path1;
+     QGraphicsPathItem* m_pathItem;
+     QList<QGraphicsEllipseItem*> m_itemList;
 
-//private slots:
-//    void scalingTime(qreal);
-//    void animFinished();
 
-//    void ReceiveBrushColor(QColor);
-//    void ReceiveThickness(int);
-//    void ReceiveType(int);
+private slots:
+    void ReceiveBrushColor(QColor);
+    void ReceiveThickness(int);
+    void ReceiveType(int);
+    void updateSceneeee();
+
 };
 
 

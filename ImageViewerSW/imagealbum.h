@@ -9,6 +9,7 @@
 #include <opencv2/videoio.hpp>
 #include <opencv2/highgui.hpp>
 #include <opencv2/opencv.hpp>
+#include "imagescene.h"
 
 using namespace cv;
 
@@ -44,6 +45,8 @@ private:
     QImage* origBrightness;
     QColor paintColor;
     int penThickness;
+
+    ImageScene* imageScene;
 
     Prescription* m_prescription;
     QString DoctorID;
