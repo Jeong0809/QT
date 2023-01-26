@@ -7,20 +7,20 @@
 NetworkManager::NetworkManager(QObject *parent)
     : QObject{parent}
 {
-    socket = new QTcpSocket(this);
+//    socket = new QTcpSocket(this);
 
-    fd_flag = connectToHost("192.168.0.39");
-    connect(socket, SIGNAL(readyRead()), this, SLOT(receiveData()));
+//    fd_flag = connectToHost("192.168.0.39");
+//    connect(socket, SIGNAL(readyRead()), this, SLOT(receiveData()));
 
-    if(!fd_flag)
-        qDebug()<<("Socket connect fail\n");
+//    if(!fd_flag)
+//        qDebug()<<("Socket connect fail\n");
 
-    else {
-        qDebug()<<("Socket connect success\n");
-        QString connectData = "CNT<CR>VEW<CR>";
-        QByteArray sendTest = connectData.toStdString().data();
-        socket->write(sendTest);
-    }
+//    else {
+//        qDebug()<<("Socket connect success\n");
+//        QString connectData = "CNT<CR>VEW<CR>";
+//        QByteArray sendTest = connectData.toStdString().data();
+//        socket->write(sendTest);
+//    }
 }
 
 bool NetworkManager::connectToHost(QString host)

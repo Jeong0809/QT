@@ -5,7 +5,6 @@
 #include <QPinchGesture>
 #include <QGraphicsItem>
 #include "imageview.h"
-#include "imagescene.h"
 
 
 ImageView::ImageView(QWidget *parent)

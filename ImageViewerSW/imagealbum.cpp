@@ -16,7 +16,6 @@ using namespace cv;
 
 #include "imagealbum.h"
 #include "ui_imagealbum.h"
-#include "imageview.h"
 #include "imagescene.h"
 #include "prescription.h"
 
@@ -27,7 +26,7 @@ ImageAlbum::ImageAlbum(QWidget *parent)
 {
     ui->setupUi(this);
 
-    imageView = new ImageView(this);
+    imageView = new QGraphicsView(this);
     imageScene = new ImageScene(this);
     m_prescription = new Prescription(0);
 
@@ -36,15 +35,12 @@ ImageAlbum::ImageAlbum(QWidget *parent)
     imageView->setDragMode(QGraphicsView::NoDrag);
     ui->gridLayout->addWidget(imageView);
     imageView->setAlignment(Qt::AlignCenter);
-
-//    connect(imageScene, SIGNAL(changed(const QList<QRectF> &)), imageScene, SLOT(updateScene()));
-
-
-    connect(imageScene, SIGNAL(changed(const QList<QRectF> &)), imageScene, SLOT(updateSceneeee()));
     imageView->setScene(imageScene);
 
+//    connect(imageScene, SIGNAL(changed(const QList<QRectF> &)), imageScene, SLOT(updateSceneeee()));
 
     connect(ui->listWidget, SIGNAL(itemDoubleClicked(QListWidgetItem*)), this, SLOT(selectItem(QListWidgetItem*)));
+
     connect(ui->ZoomIn, SIGNAL(clicked()), this, SLOT(ZoomIn()));
     connect(ui->ZoomOut, SIGNAL(clicked()), this, SLOT(ZoomOut()));
     connect(ui->LeftRotate, SIGNAL(clicked()), this, SLOT(LeftRotate()));
@@ -64,15 +60,23 @@ ImageAlbum::ImageAlbum(QWidget *parent)
     connect(ui->Lines, SIGNAL(clicked()), this, SLOT(Lines()));
     connect(ui->Freehand, SIGNAL(clicked()), this, SLOT(Freehand()));
     connect(ui->Triangle, SIGNAL(clicked()), this, SLOT(Triangle()));
+    connect(ui->Cursor, SIGNAL(clicked()), this, SLOT(Cursor()));
+    connect(ui->Delete, SIGNAL(clicked()), this, SLOT(DeleteItem()));
+    connect(ui->Ellipse, SIGNAL(clicked()), this, SLOT(Ellipse()));
+    connect(ui->Rectangle, SIGNAL(clicked()), this, SLOT(RectangleItem()));
+    connect(ui->TextBox, SIGNAL(clicked()), this, SLOT(TextBox()));
+    connect(ui->LengthMeasurement, SIGNAL(clicked()), this, SLOT(Length()));
 
     /*GraphicsView에 펜 색상, 펜 두께, 선인지 도형인지를 구분하여 시그널 전송*/
     connect(this, SIGNAL(SendThickness(int)), imageScene, SLOT(ReceiveThickness(int)));
     connect(this, SIGNAL(SendBrushColor(QColor)), imageScene, SLOT(ReceiveBrushColor(QColor)));
     connect(this, SIGNAL(SendType(int)), imageScene, SLOT(ReceiveType(int)));
+    connect(this, SIGNAL(SendText(QString)), imageScene, SLOT(ReceiveText(QString)));
+    connect(this, SIGNAL(SendLength(int, int, int, int)), imageScene, SLOT(ReceiveLength(int, int, int, int)));
 
     //처방전 작성 버튼 클릭 시 처방전 클래스로 의사 정보, 환자 정보를 전송
-    connect(this, SIGNAL(sendPrescription(QString, QString, QString, QString)),
-            m_prescription, SLOT(receivePrescription(QString, QString, QString, QString)));
+    connect(this, SIGNAL(sendPrescription(QString, QString, QString, QString, QString)),
+            m_prescription, SLOT(receivePrescription(QString, QString, QString, QString, QString)));
 
     //처방전 클래스에서 처방전 작성 완료 되면 해당 내용을 서버로 보내주기 위한 과정
     connect(m_prescription, SIGNAL(sendPrescriptionFinish(QString)), this, SLOT(receivePrescriptionFinish(QString)));
@@ -100,9 +104,51 @@ void ImageAlbum::reloadImages()
     };
 }
 
+void ImageAlbum::Length()
+{
+    if(ui->Ceph->hasFocus())
+        emit SendType(9);
+    else if(ui->Pano->hasFocus())
+        emit SendType(10);
+
+    int origWidth = selectImage->width();
+    int origHeight = selectImage->height();
+    int sceneWidth = imageScene->width();
+    int sceneHeight = imageScene->height();
+    emit SendLength(origWidth, origHeight, sceneWidth, sceneHeight);
+}
+
+void ImageAlbum::TextBox()
+{
+    ui->lineEdit->text();
+    emit SendText(ui->lineEdit->text());
+    emit SendType(6);
+    ui->lineEdit->clear();
+}
+
+void ImageAlbum::RectangleItem()
+{
+    emit SendType(5);
+}
+
+void ImageAlbum::Cursor()
+{
+    emit SendType(3);
+}
+
+void ImageAlbum::DeleteItem()
+{
+    emit SendType(7);
+}
+
+void ImageAlbum::Ellipse()
+{
+    emit SendType(4);
+}
+
 void ImageAlbum::Triangle()
 {
-    emit SendType(1);
+    emit SendType(2);
 }
 
 void ImageAlbum::Lines()
@@ -112,7 +158,7 @@ void ImageAlbum::Lines()
 
 void ImageAlbum::Freehand()
 {
-    emit SendType(2);
+    emit SendType(1);
 }
 
 void ImageAlbum::Thickness(int value)
@@ -151,12 +197,16 @@ void ImageAlbum::OrigImage()
 {
     imageView->resetTransform();
     imageScene->clear();
+    imageScene->setBackgroundBrush(Qt::white);
     ui->horizontalSlider->setSliderPosition(0);
     ui->Contrast->setValue(1.0);
 
     *selectImage = QPixmap(orignal->statusTip()).toImage();
-    imageScene->addPixmap(QPixmap(orignal->statusTip()).scaled(imageView->width(), imageView->height(),
-                                                                               Qt::KeepAspectRatio, Qt::SmoothTransformation));
+    QSize size = imageView->viewport()->size();
+    QGraphicsItem *i = imageScene->addPixmap(QPixmap(orignal->statusTip()).scaled(size, Qt::KeepAspectRatio, Qt::SmoothTransformation));
+    imageView->setAlignment(Qt::AlignCenter);
+    imageScene->setSceneRect(i->sceneBoundingRect());
+    emit SendType(8);
 }
 
 void ImageAlbum::selectItem(QListWidgetItem* item)
@@ -167,13 +217,13 @@ void ImageAlbum::selectItem(QListWidgetItem* item)
     imageView->resetTransform();
     imageScene->clear();
 
-    imageScene->setBackgroundBrush(Qt::yellow);
     QSize size = imageView->viewport()->size();
-    QGraphicsItem *i = imageScene->addPixmap(QPixmap(item->statusTip()).scaled(size, Qt::KeepAspectRatio));
+    QGraphicsItem *i = imageScene->addPixmap(QPixmap(item->statusTip()).scaled(size, Qt::KeepAspectRatio, Qt::SmoothTransformation));
     imageView->setAlignment(Qt::AlignCenter);
     imageScene->setSceneRect(i->sceneBoundingRect());
 
     qDebug() << selectImage->width();
+    qDebug() << imageScene->width();
 }
 
 void ImageAlbum::VReverse()
@@ -442,16 +492,19 @@ void ImageAlbum::Sharpening()
 void ImageAlbum::on_Prescription_clicked()
 {
     //처방전 작성 버튼 클릭 시 의사 정보, 환자 정보를 처방전 클래스로 전송
-    emit sendPrescription(DoctorID, DoctorName, PatientID, PatientName);
+    emit sendPrescription(DoctorID, DoctorName, PatientID, PatientName, PatientSex);
     m_prescription->show();
 }
 
-void ImageAlbum::receivePatientInfo(QString ID, QString Name)
+//환자 정보 클래스에서 받아온 환자 정보를 처방전 클래스로 보내기 위해 멤버 변수에 저장
+void ImageAlbum::receivePatientInfo(QString ID, QString Name, QString Sex)
 {
     PatientID = ID;
     PatientName = Name;
+    PatientSex = Sex;
 }
 
+//환자 정보 클래스에서 받아온 의사 정보를 처방전 클래스로 보내기 위해 멤버 변수에 저장
 void ImageAlbum::receiveDoctorInfo(QString ID, QString Name)
 {
     DoctorID = ID;

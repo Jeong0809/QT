@@ -100,6 +100,7 @@ void PatientInfo::on_WaitingList_itemClicked(QTreeWidgetItem *item, int column)
 {
     selectPatientID = item->text(0);
     selectPatientName = item->text(1);
+    selectPatientSex = item->text(2);
 }
 
 
@@ -133,7 +134,7 @@ void PatientInfo::on_Treatmentstart_clicked()
     emit sendWaitingPatient(Data);
 
     //대기 리스트에서 선택된 환자ID, 환자 이름을 전송 및 해당 환자 진료 시작
-    emit sendPatientInfo(selectPatientID, selectPatientName);
+    emit sendPatientInfo(selectPatientID, selectPatientName, selectPatientSex);
 }
 
 void PatientInfo::on_Camerastart_clicked()

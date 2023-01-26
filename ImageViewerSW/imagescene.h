@@ -28,7 +28,15 @@ public:
     enum DrawType {
         Lines,
         FreeHand,
-        Triangle
+        Triangle,
+        Cursor,
+        Ellipse,
+        Rectangle,
+        Text,
+        Delete,
+        Clear,
+        Ceph,
+        Pano
     };
 
 private:
@@ -40,16 +48,36 @@ private:
      int m_penThickness;
      QList<QGraphicsPathItem*> m_pathList;
 
+     QList<QGraphicsEllipseItem*> m_ellipseList;
+     QList<QGraphicsRectItem*> m_rectList;
+     QList<QGraphicsSimpleTextItem*> m_textList;
+
 
      QGraphicsPathItem* m_pathItem;
      QList<QGraphicsEllipseItem*> m_itemList;
+     QGraphicsItem* m_currentItem;
+     QPointF first;
+     QPointF second;
+     QPointF third;
+     QPointF m_startPos;
+     QPointF m_endPos;
+     int tmp;
+     QString inputText;
+
+     void addEllipseItem(QPointF, QPointF);
+     void addRectItem(QPointF, QPointF);
+     void addTextItem(QPointF);
+
+     double xRate, yRate;
 
 
 private slots:
     void ReceiveBrushColor(QColor);
     void ReceiveThickness(int);
     void ReceiveType(int);
+    void ReceiveText(QString);
     void updateSceneeee();
+    void ReceiveLength(int, int, int, int);
 
 };
 

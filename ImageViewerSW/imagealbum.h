@@ -38,7 +38,7 @@ private:
     Ui::ImageAlbum *ui;
     QListWidget* listWidget;
     QGroupBox* groupBox;
-    ImageView* imageView;
+    QGraphicsView* imageView;
     QListWidgetItem* orignal;
     QImage* origImage;
     QImage* selectImage;
@@ -53,6 +53,7 @@ private:
     QString DoctorName;
     QString PatientID;
     QString PatientName;
+    QString PatientSex;
 
 
 public slots:
@@ -77,9 +78,15 @@ public slots:
     void Lines();
     void Freehand();
     void Triangle();
+    void Cursor();
+    void DeleteItem();
+    void Ellipse();
+    void RectangleItem();
+    void TextBox();
+    void Length();
 
     void receiveDoctorInfo(QString, QString);
-    void receivePatientInfo(QString, QString);
+    void receivePatientInfo(QString, QString, QString);
     void receivePrescriptionFinish(QString);
 
 
@@ -87,9 +94,11 @@ signals:
     void SendBrushColor(QColor);
     void SendThickness(int);
     void SendType(int);
-    void sendPrescription(QString, QString, QString, QString);
+    void sendPrescription(QString, QString, QString, QString, QString);
     void sendPrescriptiontoServer(QString);
     void sendEndTreatment(QString);
+    void SendText(QString);
+    void SendLength(int, int, int, int);
 
 private slots:
     void on_Prescription_clicked();
